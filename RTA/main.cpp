@@ -1,11 +1,12 @@
 #include <iostream>
 #include <ctime>
-#include <d3d11.h>
-#pragma comment(lib, "d3d11.lib")
+#include "Renderer.h"
 
+Renderer renderer;
+HINSTANCE application;
 void Init(HINSTANCE hinst, WNDPROC proc)
 {
-	HINSTANCE application = hinst;
+	application = hinst;
 	WNDPROC appWndProc = proc;
 
 	WNDCLASSEX  wndClass;
@@ -27,16 +28,21 @@ void Init(HINSTANCE hinst, WNDPROC proc)
 		NULL, NULL, application, nullptr);
 
 	ShowWindow(window, SW_SHOW);
+
+	renderer.Init(window);
+
 }
 
 bool Run()
 {
+	renderer.Run();
 	return true;
 }
 
 void ShutDown()
 {
-
+	renderer.Shutdown();
+	UnregisterClass(L"DirectXApplication", application);
 }
 
 
@@ -57,6 +63,7 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE, LPTSTR, int)
 		}
 	}
 	ShutDown();
+	
 	return 0;
 }
 LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
