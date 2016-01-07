@@ -16,5 +16,8 @@ public:
 	inline void CreateRenderShapes(void){ renderShapes = new RenderSet; }
 	inline void AddRenderShapes(RenderNode* node){ renderShapes->AddRenderNode(node); }
 	inline void ClearRenderShapes(void){ renderShapes->ClearRenderSet(); }
+	void RenderFunc(RenderNode& node);
+	void CreateTexture(const WCHAR *buffer);
+
 };
 
