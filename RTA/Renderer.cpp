@@ -3,11 +3,13 @@
 
 Renderer::Renderer()
 {
+
 }
 
 
 Renderer::~Renderer()
 {
+
 }
 
 bool Renderer::Init(HWND win)
