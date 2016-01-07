@@ -35,7 +35,7 @@ void Init(HINSTANCE hinst, WNDPROC proc)
 
 bool Run()
 {
-	renderer.Run();
+	/*renderer.Render();*/
 	return true;
 }
 

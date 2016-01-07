@@ -53,6 +53,7 @@
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>WIN32;_DEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <SDLCheck>true</SDLCheck>
+      <AdditionalIncludeDirectories>C:\Program Files\Autodesk\FBX\FBX SDK\2015.1\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -69,6 +70,7 @@
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <PreprocessorDefinitions>WIN32;NDEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <SDLCheck>true</SDLCheck>
+      <AdditionalIncludeDirectories>C:\Program Files\Autodesk\FBX\FBX SDK\2015.1\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -79,10 +81,21 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="RenderContext.cpp" />
     <ClCompile Include="Renderer.cpp" />
+    <ClCompile Include="RenderMaterial.cpp" />
+    <ClCompile Include="RenderShape.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="ConstantBuffers.h" />
+    <ClInclude Include="Headers.h" />
+    <ClInclude Include="RenderContext.h" />
     <ClInclude Include="Renderer.h" />
+    <ClInclude Include="RenderMaterial.h" />
+    <ClInclude Include="RenderNode.h" />
+    <ClInclude Include="RenderSet.h" />
+    <ClInclude Include="RenderShape.h" />
+    <ClInclude Include="SharedDefines.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
