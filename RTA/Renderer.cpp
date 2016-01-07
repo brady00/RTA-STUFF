@@ -1,7 +1,7 @@
 #include "Renderer.h" 
 #include "RenderSet.h"
 #include "RenderNode.h"
-#define ReleaseCOM(x) { if(x){ x->Release(); x = 0; } }
+
 
 ID3D11Device * Renderer::device = 0;
 ID3D11DeviceContext * Renderer::devicecontext = 0;
@@ -11,6 +11,7 @@ ID3D11Texture2D * Renderer::BackBuffer = 0;
 ID3D11Texture2D * Renderer::DepthStencilBuffer = 0;
 ID3D11DepthStencilView * Renderer::DepthStencilView = 0;
 ID3D11Buffer * Renderer::thePerObjectCBuffer = 0;
+cbPerObject Renderer::thePerObjectData;
 D3D11_VIEWPORT Renderer::viewport;
 
 bool Renderer::Init(HWND win)
@@ -104,4 +105,18 @@ void Renderer::BuildPerObjectConstantBuffers()
 	desc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
 	device->CreateBuffer(&desc, nullptr, &thePerObjectCBuffer);
 
+}
+
+void Renderer::SetPerObjectData(DirectX::XMFLOAT4X4 &mMVP, DirectX::XMFLOAT4X4 &mWorld)
+{
+	thePerObjectData.gMVP = mMVP;
+	thePerObjectData.gWorld = mWorld;
+
+	D3D11_MAPPED_SUBRESOURCE edit;
+	devicecontext->Map(thePerObjectCBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &edit);
+	memcpy(edit.pData, &thePerObjectData, sizeof(thePerObjectData));
+	devicecontext->Unmap(thePerObjectCBuffer, 0);
+
+	devicecontext->VSSetConstantBuffers(cbPerObject::REGISTER_SLOT, 1, &thePerObjectCBuffer);
+	devicecontext->PSSetConstantBuffers(cbPerObject::REGISTER_SLOT, 1, &thePerObjectCBuffer);
 }
