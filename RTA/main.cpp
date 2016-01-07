@@ -1,6 +1,7 @@
 #include <iostream>
 #include <ctime>
 #include "Renderer.h"
+#include <fbxsdk.h>
 
 Renderer renderer;
 HINSTANCE application;
@@ -35,7 +36,9 @@ void Init(HINSTANCE hinst, WNDPROC proc)
 
 bool Run()
 {
-	renderer.Run();
+	FbxDocument* temp = nullptr;
+	(FbxScene*)(temp);
+	/*renderer.Render();*/
 	return true;
 }
 

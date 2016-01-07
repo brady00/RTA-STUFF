@@ -1,16 +1,19 @@
-#include "Renderer.h"
 #define ReleaseCOM(x) { if(x){ x->Release(); x = 0; } }
-
-Renderer::Renderer()
-{
-
-}
+#include "RenderSet.h"
+#include "RenderNode.h"
+#include "Renderer.h"
 
 
-Renderer::~Renderer()
-{
-
-}
+ID3D11Device * Renderer::device = 0;
+ID3D11DeviceContext * Renderer::devicecontext = 0;
+IDXGISwapChain * Renderer::swapchain = 0;
+ID3D11RenderTargetView * Renderer::RenderTargetView = 0;
+ID3D11Texture2D * Renderer::BackBuffer = 0;
+ID3D11Texture2D * Renderer::DepthStencilBuffer = 0;
+ID3D11DepthStencilView * Renderer::DepthStencilView = 0;
+ID3D11Buffer * Renderer::thePerObjectCBuffer = 0;
+cbPerObject Renderer::thePerObjectData;
+D3D11_VIEWPORT Renderer::viewport;
 
 bool Renderer::Init(HWND win)
 {
@@ -53,16 +56,26 @@ bool Renderer::Init(HWND win)
 	stenview.Format = DXGI_FORMAT_D32_FLOAT;
 	stenview.ViewDimension = D3D11_DSV_DIMENSION_TEXTURE2D;
 	device->CreateDepthStencilView(DepthStencilBuffer, &stenview, &DepthStencilView);
+	BuildPerObjectConstantBuffers();
 	return true;
 }
 
-bool Renderer::Run()
+bool Renderer::Render(RenderSet &set)
 {
 	devicecontext->OMSetRenderTargets(1, &RenderTargetView, DepthStencilView);
 	
 	float color[4] = { 0, 0, 1, 0 };
 	devicecontext->ClearDepthStencilView(DepthStencilView, D3D11_CLEAR_DEPTH, 1, 0);
 	devicecontext->ClearRenderTargetView(RenderTargetView, color);
+
+	RenderNode *pCurrent = set.GetHead();
+
+	while (0 != pCurrent)
+	{
+		pCurrent->RenderProcess();
+		pCurrent = pCurrent->GetNext();
+	}
+
 	swapchain->Present(0, 0);
 	return false;
 }
@@ -80,4 +93,31 @@ bool Renderer::Shutdown()
 	ReleaseCOM(device);
 
 	return true;
+}
+
+void Renderer::BuildPerObjectConstantBuffers()
+{
+	// per object CBuffer
+	D3D11_BUFFER_DESC desc;
+	ZeroMemory(&desc, sizeof(desc));
+	desc.Usage = D3D11_USAGE_DYNAMIC;
+	desc.ByteWidth = sizeof(cbPerObject);
+	desc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
+	desc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
+	device->CreateBuffer(&desc, nullptr, &thePerObjectCBuffer);
+
+}
+
+void Renderer::SetPerObjectData(DirectX::XMFLOAT4X4 &mMVP, DirectX::XMFLOAT4X4 &mWorld)
+{
+	thePerObjectData.gMVP = mMVP;
+	thePerObjectData.gWorld = mWorld;
+
+	D3D11_MAPPED_SUBRESOURCE edit;
+	devicecontext->Map(thePerObjectCBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &edit);
+	memcpy(edit.pData, &thePerObjectData, sizeof(thePerObjectData));
+	devicecontext->Unmap(thePerObjectCBuffer, 0);
+
+	devicecontext->VSSetConstantBuffers(cbPerObject::REGISTER_SLOT, 1, &thePerObjectCBuffer);
+	devicecontext->PSSetConstantBuffers(cbPerObject::REGISTER_SLOT, 1, &thePerObjectCBuffer);
 }

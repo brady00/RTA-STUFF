@@ -84,13 +84,28 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="DDSTextureLoader.cpp" />
     <ClCompile Include="FBXLoader.cpp" />
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="pch.cpp" />
+    <ClCompile Include="RenderContext.cpp" />
     <ClCompile Include="Renderer.cpp" />
+    <ClCompile Include="RenderMaterial.cpp" />
+    <ClCompile Include="RenderShape.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="ConstantBuffers.h" />
+    <ClInclude Include="DDSTextureLoader.h" />
     <ClInclude Include="FBXLoader.h" />
+    <ClInclude Include="Headers.h" />
+    <ClInclude Include="pch.h" />
+    <ClInclude Include="RenderContext.h" />
     <ClInclude Include="Renderer.h" />
+    <ClInclude Include="RenderMaterial.h" />
+    <ClInclude Include="RenderNode.h" />
+    <ClInclude Include="RenderSet.h" />
+    <ClInclude Include="RenderShape.h" />
+    <ClInclude Include="SharedDefines.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
