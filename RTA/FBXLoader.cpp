@@ -4,7 +4,7 @@
 
 FbxManager* g_pFbxSdkManager = nullptr;
 
-bool FileInfo::ExporterHeader::FBXLoad(FbxDocument * pDocument, char * fileName, std::vector<MyVertex>* pOutVertexVector)
+bool FileInfo::ExporterHeader::FBXLoad(char * fileName, std::vector<MyVertex>* pOutVertexVector)
 {
 	if (g_pFbxSdkManager == nullptr)
 	{
@@ -14,10 +14,10 @@ bool FileInfo::ExporterHeader::FBXLoad(FbxDocument * pDocument, char * fileName,
 		g_pFbxSdkManager->SetIOSettings(pIOsettings);
 	}
 
-	FbxImporter* pImporter = FbxImporter::Create(g_pFbxSdkManager, "");
-	FbxScene* pFbxScene = FbxScene::Create(g_pFbxSdkManager, "");
+	FbxImporter* pImporter = FbxImporter::Create(g_pFbxSdkManager, fileName);
+	FbxScene* pFbxScene = FbxScene::Create(g_pFbxSdkManager, fileName);
 
-	bool bSuccess = pImporter->Initialize("C:\\MyPath\\MyModel.fbx", -1, g_pFbxSdkManager->GetIOSettings());
+	bool bSuccess = pImporter->Initialize(fileName, -1, g_pFbxSdkManager->GetIOSettings());
 	if (!bSuccess) return false;
 
 	bSuccess = pImporter->Import(pFbxScene);
@@ -48,7 +48,6 @@ bool FileInfo::ExporterHeader::FBXLoad(FbxDocument * pDocument, char * fileName,
 			for (int j = 0; j < pMesh->GetPolygonCount(); j++)
 			{
 				int iNumVertices = pMesh->GetPolygonSize(j);
-
 
 				for (int k = 0; k < iNumVertices; k++)
 				{

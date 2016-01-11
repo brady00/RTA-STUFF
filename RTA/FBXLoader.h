@@ -67,7 +67,7 @@ namespace FileInfo
 		
 		//FILE * mFilePointer;
 
-		bool FileInfo::ExporterHeader::FBXLoad(FbxDocument * pDocument, char * fileName, std::vector<MyVertex>* pOutVertexVector);
+		bool FileInfo::ExporterHeader::FBXLoad(char * fileName, std::vector<MyVertex>* pOutVertexVector);
 		//Used for reading in the header
 		ExporterHeader() {}
 		//used for writing out the header

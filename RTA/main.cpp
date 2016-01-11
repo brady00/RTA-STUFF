@@ -3,6 +3,8 @@
 #include "Renderer.h"
 #include "RenderSet.h"
 #include <fbxsdk.h>
+#include "FBXLoader.h"
+#include <vector>
 
 Renderer renderer;
 HINSTANCE application;
@@ -37,8 +39,11 @@ void Init(HINSTANCE hinst, WNDPROC proc)
 
 bool Run()
 {
-	RenderSet* renderset = nullptr;
-	renderer.Render(renderset);
+	//RenderSet* renderset = nullptr;
+	//renderer.Render(renderset);
+	FileInfo::ExporterHeader file;
+	std::vector<FileInfo::MyVertex> positions;
+	file.FBXLoad("Box_Idle.fbx", &positions);
 	return true;
 }
 
