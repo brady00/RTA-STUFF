@@ -25,6 +25,7 @@ namespace FileInfo
 	struct MyVertex
 	{
 		float pos[3];
+		float uv[2];
 	};
 	struct ExporterHeader
 	{
