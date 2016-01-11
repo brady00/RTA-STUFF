@@ -71,9 +71,10 @@ bool FileInfo::ExporterHeader::FBXLoad(char * fileName, std::vector<MyVertex>* p
 					int lUVIndex = lUseIndex ? lUVElement->GetIndexArray().GetAt(lPolyVertIndex) : lPolyVertIndex;
 					lUVValue = lUVElement->GetDirectArray().GetAt(lUVIndex);
 
+					vertex.uv[0] = lUVValue.mData[0];
+					vertex.uv[1] = lUVValue.mData[1];
 
 					pOutVertexVector->push_back(vertex);
-
 				}
 			}
 
