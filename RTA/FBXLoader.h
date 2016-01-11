@@ -1,12 +1,12 @@
 #pragma once
-#ifndef __EXPORTER_HEADER_H__
-#define __EXPORTER_HEADER_H__
+//#ifndef __EXPORTER_HEADER_H__
+//#define __EXPORTER_HEADER_H__
 //--------------------------------------------------------------------------------
 //THis file should be included in the loader and the exporter
 #include <memory.h>
 #include <stdint.h>
-#include <sys/stat.h>
 #include <fbxsdk.h>
+#include <sys/stat.h>
 #include <time.h>
 //--------------------------------------------------------------------------------
 
@@ -63,6 +63,7 @@ namespace FileInfo
 		//FILE * mFilePointer;
 
 		bool FBXLoad(FbxDocument * pDocument, char * fileName);
+		void ConvertToBinary(FbxDocument * pDocument);
 		//Used for reading in the header
 		ExporterHeader() {}
 		//used for writing out the header
@@ -84,4 +85,4 @@ namespace FileInfo
 	};
 };
 //--------------------------------------------------------------------------------
-#endif //__EXPORTER_HEADER_H__
+//#endif //__EXPORTER_HEADER_H__
