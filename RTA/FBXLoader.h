@@ -1,13 +1,15 @@
 #pragma once
-//#ifndef __EXPORTER_HEADER_H__
-//#define __EXPORTER_HEADER_H__
+#ifndef __EXPORTER_HEADER_H__
+#define __EXPORTER_HEADER_H__
 //--------------------------------------------------------------------------------
 //THis file should be included in the loader and the exporter
 #include <memory.h>
 #include <stdint.h>
-#include <fbxsdk.h>
 #include <sys/stat.h>
+#include <fbxsdk.h>
+#pragma comment(lib, "libfbxsdk.dll")
 #include <time.h>
+#include <vector>
 //--------------------------------------------------------------------------------
 
 //Change this when any changes are done to the struct ExporterHeader
@@ -20,6 +22,10 @@ namespace FileInfo
 	enum class MODEL_TYPES : int8_t { COLOR, TEXTURE, TEXTURE_LIT, NORMALMAP, NORMALMAP_ANIMATED, BASIC, MAX_TYPES };
 	enum class INDEX_TYPES : int8_t { INDEX32, INDEX16, TRI_STRIP };
 
+	struct MyVertex
+	{
+		float pos[3];
+	};
 	struct ExporterHeader
 	{
 		union
@@ -62,8 +68,7 @@ namespace FileInfo
 		
 		//FILE * mFilePointer;
 
-		bool FBXLoad(FbxDocument * pDocument, char * fileName);
-		void ConvertToBinary(FbxDocument * pDocument);
+		bool FileInfo::ExporterHeader::FBXLoad( char * fileName, std::vector<MyVertex>* pOutVertexVector);
 		//Used for reading in the header
 		ExporterHeader() {}
 		//used for writing out the header
@@ -85,4 +90,4 @@ namespace FileInfo
 	};
 };
 //--------------------------------------------------------------------------------
-//#endif //__EXPORTER_HEADER_H__
+#endif //__EXPORTER_HEADER_H__

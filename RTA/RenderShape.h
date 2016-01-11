@@ -14,6 +14,7 @@ protected:
 	UINT                        numVertices;
 	RenderMaterial* renderMaterial;
 	DirectX::XMFLOAT4X4 worldMatrix;
+	DirectX::XMFLOAT4X4 viewProj;
 private:
 
 public:
@@ -25,6 +26,7 @@ public:
 	inline void SetWorldMatrix(const DirectX::XMFLOAT4X4 *mat) { worldMatrix = *mat; }
 	inline DirectX::XMFLOAT4X4 &GetWorldMatrix(void) { return worldMatrix; }
 	inline DirectX::XMFLOAT4X4 *GetWorldMatrixPtr(void) { return &worldMatrix; }
+	inline DirectX::XMFLOAT4X4 &GetViewProjMatrix(void) { return viewProj; }
 	inline RenderMaterial* GetRenderMaterial(void){ return renderMaterial; }
 	UINT getNumPrimitives(){return numPrimitives;}
 	D3D_PRIMITIVE_TOPOLOGY getPrimitiveType() { return primitiveType; }

@@ -1,6 +1,7 @@
 #include <iostream>
 #include <ctime>
 #include "Renderer.h"
+#include "RenderSet.h"
 #include <fbxsdk.h>
 
 Renderer renderer;
@@ -36,9 +37,8 @@ void Init(HINSTANCE hinst, WNDPROC proc)
 
 bool Run()
 {
-	FbxDocument* temp = nullptr;
-	(FbxScene*)(temp);
-	/*renderer.Render();*/
+	RenderSet* renderset = nullptr;
+	renderer.Render(renderset);
 	return true;
 }
 

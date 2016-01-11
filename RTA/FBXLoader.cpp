@@ -2,77 +2,85 @@
 
 
 
-bool FileInfo::ExporterHeader::FBXLoad(FbxDocument * pDocument, char * fileName)
+FbxManager* g_pFbxSdkManager = nullptr;
+
+bool FileInfo::ExporterHeader::FBXLoad(char * fileName, std::vector<MyVertex>* pOutVertexVector)
 {
-	FILE		*	mFilePointer = NULL;
-	FbxManager	*	mManager = FbxManager::Create();
-	FbxScene	*	lScene = (FbxScene*)(pDocument);
-	bool            lIsAScene = (lScene != NULL);
-	bool            lResult = false;
-
-
-	FBXSDK_fopen(mFilePointer, fileName, "r");
-
-	if (lIsAScene)
+	if (g_pFbxSdkManager == nullptr)
 	{
-		FbxNode* lRootNode = lScene->GetRootNode();
-		FbxNodeAttribute * lRootNodeAttribute = FbxNull::Create(lScene, "");
-		lRootNode->SetNodeAttribute(lRootNodeAttribute);
+		g_pFbxSdkManager = FbxManager::Create();
 
-		int lSize;
-		char* lBuffer = NULL;
-		if (mFilePointer != NULL)
+		FbxIOSettings* pIOsettings = FbxIOSettings::Create(g_pFbxSdkManager, IOSROOT);
+		g_pFbxSdkManager->SetIOSettings(pIOsettings);
+	}
+
+	FbxImporter* pImporter = FbxImporter::Create(g_pFbxSdkManager, fileName);
+	FbxScene* pFbxScene = FbxScene::Create(g_pFbxSdkManager, fileName);
+	FbxStringList UVsetNames;
+
+	bool bSuccess = pImporter->Initialize(fileName, -1, g_pFbxSdkManager->GetIOSettings());
+	if (!bSuccess) return false;
+
+	bSuccess = pImporter->Import(pFbxScene);
+	if (!bSuccess) return false;
+
+	pImporter->Destroy();
+
+	FbxNode* pFbxRootNode = pFbxScene->GetRootNode();
+
+	if (pFbxRootNode)
+	{
+		for (int i = 0; i < pFbxRootNode->GetChildCount(); i++)
 		{
-			//To obtain file size
-			fseek(mFilePointer, 0, SEEK_END);
-			lSize = ftell(mFilePointer);
-			rewind(mFilePointer);
+			FbxNode* pFbxChildNode = pFbxRootNode->GetChild(i);
 
-			//Read file content to a string.
-			lBuffer = (char*)malloc(sizeof(char)*lSize + 1);
-			size_t lRead = fread(lBuffer, 1, lSize, mFilePointer);
-			lBuffer[lRead] = '\0';
-			FbxString lString(lBuffer);
+			if (pFbxChildNode->GetNodeAttribute() == NULL)
+				continue;
 
-			//Parse the string to get name and relation of Nodes. 
-			FbxString lSubString, lChildName, lParentName;
-			FbxNode* lChildNode;
-			FbxNode* lParentNode;
-			FbxNodeAttribute* lChildAttribute;
+			FbxNodeAttribute::EType AttributeType = pFbxChildNode->GetNodeAttribute()->GetAttributeType();
 
-			int lEndTokenCount = lString.GetTokenCount("\n");
+			if (AttributeType != FbxNodeAttribute::eMesh)
+				continue;
 
-			for (int i = 0; i < lEndTokenCount; i++)
+			FbxMesh* pMesh = (FbxMesh*)pFbxChildNode->GetNodeAttribute();
+			pMesh->GetUVSetNames(UVsetNames);
+			const char * UVList = UVsetNames.GetStringAt(i);
+			const FbxGeometryElementUV * lUVElement = pMesh->GetElementUV(UVList);
+
+			const bool lUseIndex = lUVElement->GetReferenceMode() != FbxGeometryElement::eDirect;
+
+			FbxVector4* pVertices = pMesh->GetControlPoints();
+
+			for (int j = 0; j < pMesh->GetPolygonCount(); j++)
 			{
-				lSubString = lString.GetToken(i, "\n");
-				FbxString lNodeString;
-				lChildName = lSubString.GetToken(0, "\"");
-				lParentName = lSubString.GetToken(2, "\"");
+				int iNumVertices = pMesh->GetPolygonSize(j);
 
-				//Build node hierarchy.
-				if (lParentName == "RootNode")
+
+				for (int k = 0; k < iNumVertices; k++)
 				{
-					lChildNode = FbxNode::Create(lScene, lChildName.Buffer());
-					lChildAttribute = FbxNull::Create(mManager, "");
-					lChildNode->SetNodeAttribute(lChildAttribute);
+					int iControlPointIndex = pMesh->GetPolygonVertex(j, k);
 
-					lRootNode->AddChild(lChildNode);
-				}
-				else
-				{
-					lChildNode = FbxNode::Create(lScene, lChildName.Buffer());
-					lChildAttribute = FbxNull::Create(lScene, "");
-					lChildNode->SetNodeAttribute(lChildAttribute);
+					MyVertex vertex;
+					vertex.pos[0] = (float)pVertices[iControlPointIndex].mData[0];
+					vertex.pos[1] = (float)pVertices[iControlPointIndex].mData[1];
+					vertex.pos[2] = (float)pVertices[iControlPointIndex].mData[2];
 
-					lParentNode = lRootNode->FindChild(lParentName.Buffer());
-					lParentNode->AddChild(lChildNode);
+					FbxVector2 lUVValue;
+					int lPolyVertIndex = pMesh->GetPolygonVertex(j, k);
+					
+					int lUVIndex = lUseIndex ? lUVElement->GetIndexArray().GetAt(lPolyVertIndex) : lPolyVertIndex;
+					lUVValue = lUVElement->GetDirectArray().GetAt(lUVIndex);
+
+
+					pOutVertexVector->push_back(vertex);
+
 				}
 			}
-			free(lBuffer);
+
 		}
-		lResult = true;
+
 	}
-	return lResult;
+	return true;
 }
 
 
