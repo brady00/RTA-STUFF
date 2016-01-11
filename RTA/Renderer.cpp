@@ -60,7 +60,7 @@ bool Renderer::Init(HWND win)
 	return true;
 }
 
-bool Renderer::Render(RenderSet &set)
+bool Renderer::Render(RenderSet *set)
 {
 	devicecontext->OMSetRenderTargets(1, &RenderTargetView, DepthStencilView);
 	
@@ -68,7 +68,7 @@ bool Renderer::Render(RenderSet &set)
 	devicecontext->ClearDepthStencilView(DepthStencilView, D3D11_CLEAR_DEPTH, 1, 0);
 	devicecontext->ClearRenderTargetView(RenderTargetView, color);
 
-	RenderNode *pCurrent = set.GetHead();
+	RenderNode *pCurrent = set->GetHead();
 
 	while (0 != pCurrent)
 	{
@@ -91,6 +91,7 @@ bool Renderer::Shutdown()
 	ReleaseCOM(swapchain);
 	ReleaseCOM(devicecontext);
 	ReleaseCOM(device);
+	ReleaseCOM(thePerObjectCBuffer);
 
 	return true;
 }
