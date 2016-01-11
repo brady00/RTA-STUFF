@@ -16,6 +16,7 @@ bool FileInfo::ExporterHeader::FBXLoad(char * fileName, std::vector<MyVertex>* p
 
 	FbxImporter* pImporter = FbxImporter::Create(g_pFbxSdkManager, fileName);
 	FbxScene* pFbxScene = FbxScene::Create(g_pFbxSdkManager, fileName);
+	FbxStringList UVsetNames;
 
 	bool bSuccess = pImporter->Initialize(fileName, -1, g_pFbxSdkManager->GetIOSettings());
 	if (!bSuccess) return false;
@@ -42,12 +43,18 @@ bool FileInfo::ExporterHeader::FBXLoad(char * fileName, std::vector<MyVertex>* p
 				continue;
 
 			FbxMesh* pMesh = (FbxMesh*)pFbxChildNode->GetNodeAttribute();
+			pMesh->GetUVSetNames(UVsetNames);
+			const char * UVList = UVsetNames.GetStringAt(i);
+			const FbxGeometryElementUV * lUVElement = pMesh->GetElementUV(UVList);
+
+			const bool lUseIndex = lUVElement->GetReferenceMode() != FbxGeometryElement::eDirect;
 
 			FbxVector4* pVertices = pMesh->GetControlPoints();
 
 			for (int j = 0; j < pMesh->GetPolygonCount(); j++)
 			{
 				int iNumVertices = pMesh->GetPolygonSize(j);
+
 
 				for (int k = 0; k < iNumVertices; k++)
 				{
@@ -57,7 +64,16 @@ bool FileInfo::ExporterHeader::FBXLoad(char * fileName, std::vector<MyVertex>* p
 					vertex.pos[0] = (float)pVertices[iControlPointIndex].mData[0];
 					vertex.pos[1] = (float)pVertices[iControlPointIndex].mData[1];
 					vertex.pos[2] = (float)pVertices[iControlPointIndex].mData[2];
+
+					FbxVector2 lUVValue;
+					int lPolyVertIndex = pMesh->GetPolygonVertex(j, k);
+					
+					int lUVIndex = lUseIndex ? lUVElement->GetIndexArray().GetAt(lPolyVertIndex) : lPolyVertIndex;
+					lUVValue = lUVElement->GetDirectArray().GetAt(lUVIndex);
+
+
 					pOutVertexVector->push_back(vertex);
+
 				}
 			}
 

@@ -21,6 +21,7 @@ namespace FileInfo
 	enum class FILE_TYPES : int8_t { MESH, BIND_POSE, ANIMATION, NAV_MESH };
 	enum class MODEL_TYPES : int8_t { COLOR, TEXTURE, TEXTURE_LIT, NORMALMAP, NORMALMAP_ANIMATED, BASIC, MAX_TYPES };
 	enum class INDEX_TYPES : int8_t { INDEX32, INDEX16, TRI_STRIP };
+
 	struct MyVertex
 	{
 		float pos[3];
@@ -67,7 +68,7 @@ namespace FileInfo
 		
 		//FILE * mFilePointer;
 
-		bool FileInfo::ExporterHeader::FBXLoad(char * fileName, std::vector<MyVertex>* pOutVertexVector);
+		bool FileInfo::ExporterHeader::FBXLoad( char * fileName, std::vector<MyVertex>* pOutVertexVector);
 		//Used for reading in the header
 		ExporterHeader() {}
 		//used for writing out the header
