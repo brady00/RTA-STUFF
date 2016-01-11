@@ -8,8 +8,7 @@ void RenderShape::RenderFunc(RenderNode& node)
 
 	// Set matrices
 	DirectX::XMMATRIX world = XMLoadFloat4x4(shape.GetWorldMatrixPtr());
-	DirectX::XMMATRIX viewProj;
-	DirectX::XMMATRIX worldViewProj = world*viewProj;
+	DirectX::XMMATRIX worldViewProj = world*XMLoadFloat4x4(&shape.GetViewProjMatrix());
 	DirectX::XMFLOAT4X4 tempMVP;
 	DirectX::XMFLOAT4X4 tempWorld;
 	DirectX::XMStoreFloat4x4(&tempMVP, worldViewProj);

@@ -7,6 +7,7 @@ protected:
 	RenderSet* renderShapes;
 	//textures
 	ID3D11Texture2D* texture;
+	ID3D11ShaderResourceView* ShaderResourceView;
 private:
 
 public:
