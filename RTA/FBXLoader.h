@@ -7,7 +7,9 @@
 #include <stdint.h>
 #include <sys/stat.h>
 #include <fbxsdk.h>
+#pragma comment(lib, "libfbxsdk.dll")
 #include <time.h>
+#include <vector>
 //--------------------------------------------------------------------------------
 
 //Change this when any changes are done to the struct ExporterHeader
@@ -19,7 +21,10 @@ namespace FileInfo
 	enum class FILE_TYPES : int8_t { MESH, BIND_POSE, ANIMATION, NAV_MESH };
 	enum class MODEL_TYPES : int8_t { COLOR, TEXTURE, TEXTURE_LIT, NORMALMAP, NORMALMAP_ANIMATED, BASIC, MAX_TYPES };
 	enum class INDEX_TYPES : int8_t { INDEX32, INDEX16, TRI_STRIP };
-
+	struct MyVertex
+	{
+		float pos[3];
+	};
 	struct ExporterHeader
 	{
 		union
@@ -62,7 +67,7 @@ namespace FileInfo
 		
 		//FILE * mFilePointer;
 
-		bool FBXLoad(FbxDocument * pDocument, char * fileName);
+		bool FileInfo::ExporterHeader::FBXLoad(FbxDocument * pDocument, char * fileName, std::vector<MyVertex>* pOutVertexVector);
 		//Used for reading in the header
 		ExporterHeader() {}
 		//used for writing out the header

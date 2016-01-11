@@ -2,77 +2,70 @@
 
 
 
-//bool FileInfo::ExporterHeader::FBXLoad(FbxDocument * pDocument, char * fileName)
-//{
-//	FILE		*	mFilePointer = NULL;
-//	FbxManager	*	mManager = FbxManager::Create();
-//	FbxScene	*	lScene = (FbxScene*)(pDocument);
-//	bool            lIsAScene = (lScene != NULL);
-//	bool            lResult = false;
-//
-//
-//	FBXSDK_fopen(mFilePointer, fileName, "r");
-//
-//	if (lIsAScene)
-//	{
-//		FbxNode* lRootNode = lScene->GetRootNode();
-//		FbxNodeAttribute * lRootNodeAttribute = FbxNull::Create(lScene, "");
-//		lRootNode->SetNodeAttribute(lRootNodeAttribute);
-//
-//		int lSize;
-//		char* lBuffer = NULL;
-//		if (mFilePointer != NULL)
-//		{
-//			//To obtain file size
-//			fseek(mFilePointer, 0, SEEK_END);
-//			lSize = ftell(mFilePointer);
-//			rewind(mFilePointer);
-//
-//			//Read file content to a string.
-//			lBuffer = (char*)malloc(sizeof(char)*lSize + 1);
-//			size_t lRead = fread(lBuffer, 1, lSize, mFilePointer);
-//			lBuffer[lRead] = '\0';
-//			FbxString lString(lBuffer);
-//
-//			//Parse the string to get name and relation of Nodes. 
-//			FbxString lSubString, lChildName, lParentName;
-//			FbxNode* lChildNode;
-//			FbxNode* lParentNode;
-//			FbxNodeAttribute* lChildAttribute;
-//
-//			int lEndTokenCount = lString.GetTokenCount("\n");
-//
-//			for (int i = 0; i < lEndTokenCount; i++)
-//			{
-//				lSubString = lString.GetToken(i, "\n");
-//				FbxString lNodeString;
-//				lChildName = lSubString.GetToken(0, "\"");
-//				lParentName = lSubString.GetToken(2, "\"");
-//
-//				//Build node hierarchy.
-//				if (lParentName == "RootNode")
-//				{
-//					lChildNode = FbxNode::Create(lScene, lChildName.Buffer());
-//					lChildAttribute = FbxNull::Create(mManager, "");
-//					lChildNode->SetNodeAttribute(lChildAttribute);
-//
-//					lRootNode->AddChild(lChildNode);
-//				}
-//				else
-//				{
-//					lChildNode = FbxNode::Create(lScene, lChildName.Buffer());
-//					lChildAttribute = FbxNull::Create(lScene, "");
-//					lChildNode->SetNodeAttribute(lChildAttribute);
-//
-//					lParentNode = lRootNode->FindChild(lParentName.Buffer());
-//					lParentNode->AddChild(lChildNode);
-//				}
-//			}
-//			free(lBuffer);
-//		}
-//		lResult = true;
-//	}
-//	return lResult;
-//}
+FbxManager* g_pFbxSdkManager = nullptr;
+
+bool FileInfo::ExporterHeader::FBXLoad(FbxDocument * pDocument, char * fileName, std::vector<MyVertex>* pOutVertexVector)
+{
+	if (g_pFbxSdkManager == nullptr)
+	{
+		g_pFbxSdkManager = FbxManager::Create();
+
+		FbxIOSettings* pIOsettings = FbxIOSettings::Create(g_pFbxSdkManager, IOSROOT);
+		g_pFbxSdkManager->SetIOSettings(pIOsettings);
+	}
+
+	FbxImporter* pImporter = FbxImporter::Create(g_pFbxSdkManager, "");
+	FbxScene* pFbxScene = FbxScene::Create(g_pFbxSdkManager, "");
+
+	bool bSuccess = pImporter->Initialize("C:\\MyPath\\MyModel.fbx", -1, g_pFbxSdkManager->GetIOSettings());
+	if (!bSuccess) return false;
+
+	bSuccess = pImporter->Import(pFbxScene);
+	if (!bSuccess) return false;
+
+	pImporter->Destroy();
+
+	FbxNode* pFbxRootNode = pFbxScene->GetRootNode();
+
+	if (pFbxRootNode)
+	{
+		for (int i = 0; i < pFbxRootNode->GetChildCount(); i++)
+		{
+			FbxNode* pFbxChildNode = pFbxRootNode->GetChild(i);
+
+			if (pFbxChildNode->GetNodeAttribute() == NULL)
+				continue;
+
+			FbxNodeAttribute::EType AttributeType = pFbxChildNode->GetNodeAttribute()->GetAttributeType();
+
+			if (AttributeType != FbxNodeAttribute::eMesh)
+				continue;
+
+			FbxMesh* pMesh = (FbxMesh*)pFbxChildNode->GetNodeAttribute();
+
+			FbxVector4* pVertices = pMesh->GetControlPoints();
+
+			for (int j = 0; j < pMesh->GetPolygonCount(); j++)
+			{
+				int iNumVertices = pMesh->GetPolygonSize(j);
+
+
+				for (int k = 0; k < iNumVertices; k++)
+				{
+					int iControlPointIndex = pMesh->GetPolygonVertex(j, k);
+
+					MyVertex vertex;
+					vertex.pos[0] = (float)pVertices[iControlPointIndex].mData[0];
+					vertex.pos[1] = (float)pVertices[iControlPointIndex].mData[1];
+					vertex.pos[2] = (float)pVertices[iControlPointIndex].mData[2];
+					pOutVertexVector->push_back(vertex);
+				}
+			}
+
+		}
+
+	}
+	return true;
+}
 
 

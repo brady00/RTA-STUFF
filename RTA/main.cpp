@@ -37,7 +37,7 @@ void Init(HINSTANCE hinst, WNDPROC proc)
 
 bool Run()
 {
-	RenderSet renderset;
+	RenderSet* renderset = nullptr;
 	renderer.Render(renderset);
 	return true;
 }
