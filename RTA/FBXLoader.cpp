@@ -45,7 +45,9 @@ bool FileInfo::ExporterHeader::FBXLoad(char * fileName, std::vector<MyVertex>* p
 			FbxMesh* pMesh = (FbxMesh*)pFbxChildNode->GetNodeAttribute();
 			pMesh->GetUVSetNames(UVsetNames);
 			const char * UVList = UVsetNames.GetStringAt(i);
+
 			const FbxGeometryElementUV * lUVElement = pMesh->GetElementUV(UVList);
+			FbxGeometryElementNormal* lNormalElement = pMesh->GetElementNormal();
 
 			const bool lUseIndex = lUVElement->GetReferenceMode() != FbxGeometryElement::eDirect;
 
@@ -71,9 +73,23 @@ bool FileInfo::ExporterHeader::FBXLoad(char * fileName, std::vector<MyVertex>* p
 					int lUVIndex = lUseIndex ? lUVElement->GetIndexArray().GetAt(lPolyVertIndex) : lPolyVertIndex;
 					lUVValue = lUVElement->GetDirectArray().GetAt(lUVIndex);
 
+					int lNormalIndex = 0;
+					//reference mode is direct, the normal index is same as vertex index.
+					//get normals by the index of control vertex
+					if (lNormalElement->GetReferenceMode() == FbxGeometryElement::eDirect)
+						lNormalIndex = k;
+					//reference mode is index-to-direct, get normals by the index-to-direct
+					if (lNormalElement->GetReferenceMode() == FbxGeometryElement::eIndexToDirect)
+						lNormalIndex = lNormalElement->GetIndexArray().GetAt(k);
+					//Got normals of each vertex.
+					FbxVector4 lNormal = lNormalElement->GetDirectArray().GetAt(lNormalIndex);
+
 					vertex.uv[0] = lUVValue.mData[0];
 					vertex.uv[1] = lUVValue.mData[1];
-
+					vertex.normals[0] = lNormal.mData[0];
+					vertex.normals[1] = lNormal.mData[1];
+					vertex.normals[2] = lNormal.mData[2];
+				
 					pOutVertexVector->push_back(vertex);
 				}
 			}
