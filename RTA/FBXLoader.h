@@ -26,6 +26,7 @@ namespace FileInfo
 	{
 		float pos[3];
 		float uv[2];
+		float normals[3];
 	};
 	struct ExporterHeader
 	{
