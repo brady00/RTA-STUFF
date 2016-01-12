@@ -8,7 +8,16 @@ protected:
 	RenderNode *tailPtr;
 public:
 	RenderSet(void){};
-	virtual ~RenderSet(void) {}
+	virtual ~RenderSet(void)
+	{
+		RenderNode* temp = headPtr;
+		while (headPtr != nullptr)
+		{
+			headPtr = headPtr->GetNext();
+			delete temp;
+			temp = headPtr;
+		}
+	}
 	virtual void AddRenderNode(RenderNode *nodePtr)
 	{
 		nodePtr->SetNext(0);

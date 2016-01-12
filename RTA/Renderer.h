@@ -19,6 +19,7 @@ public:
 	static ID3D11Texture2D*				BackBuffer;
 	static ID3D11Texture2D*				DepthStencilBuffer;
 	static ID3D11DepthStencilView*			DepthStencilView;
+	static ID3D11SamplerState*				sampler;
 	static cbPerObject thePerObjectData;
 	static ID3D11Buffer *thePerObjectCBuffer;
 	static void BuildPerObjectConstantBuffers();

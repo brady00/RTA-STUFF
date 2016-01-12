@@ -8,6 +8,7 @@ const static int REGISTER_SLOT = 0;
 #endif
 CONSTANT_BUFFER_END
 
+
 CONSTANT_BUFFER_BEGIN(cbPerCamera, b1)
 float4x4	gViewProj;
 float4x4	gInvViewProj;

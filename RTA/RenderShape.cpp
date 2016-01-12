@@ -1,7 +1,7 @@
 #include "RenderShape.h"
 #include "Renderer.h"
 
-void RenderShape::RenderFunc(RenderNode& node)
+void RenderShape::RenderFunction(RenderNode& node)
 {
 	RenderShape &shape = (RenderShape &)node;
 	//RenderContext &context = *shape.GetRenderContext();
@@ -14,7 +14,7 @@ void RenderShape::RenderFunc(RenderNode& node)
 	DirectX::XMStoreFloat4x4(&tempMVP, worldViewProj);
 	DirectX::XMStoreFloat4x4(&tempWorld, world);
 	Renderer::SetPerObjectData(tempMVP, tempWorld);
+	Renderer::devicecontext->IASetPrimitiveTopology(shape.getPrimitiveType());
 
-	Renderer::devicecontext->DrawIndexed(shape.getNumPrimitives() * 3,
-		shape.startIndex, shape.startVertex);
+	Renderer::devicecontext->Draw(shape.getNumPrimitives(), shape.startVertex);
 }

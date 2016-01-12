@@ -10,6 +10,7 @@ protected:
 	RenderNode *nextPtr;
 public:
 	RenderNode() { nextPtr = 0; }
+	virtual ~RenderNode(){};
 	EDRenderFunc RenderFunc;
 	void RenderProcess(){RenderFunc(*this);}
 	inline RenderNode *GetNext(void) { return nextPtr; }

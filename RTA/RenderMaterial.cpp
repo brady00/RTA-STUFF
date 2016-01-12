@@ -5,17 +5,23 @@
 
 RenderMaterial::RenderMaterial()
 {
+	//RenderFunc = RenderFunction;
 }
 
 
 RenderMaterial::~RenderMaterial()
 {
+	ReleaseCOM(ShaderResourceView);
+	ReleaseCOM(texture);
+	if (renderShapes)
+		delete renderShapes;
 }
 
-void RenderMaterial::RenderFunc(RenderNode& node)
+void RenderMaterial::RenderFunction(RenderNode& node)
 {
-	Renderer::devicecontext->PSSetShaderResources(0, 1, &ShaderResourceView);
-	Renderer::Render(renderShapes);
+	RenderMaterial &material = (RenderMaterial&)node;
+	Renderer::devicecontext->PSSetShaderResources(0, 1, &material.ShaderResourceView);
+	Renderer::Render(material.renderShapes);
 }
 
 void RenderMaterial::CreateTexture(const WCHAR *buffer)

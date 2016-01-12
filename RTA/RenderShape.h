@@ -27,12 +27,18 @@ public:
 	inline DirectX::XMFLOAT4X4 &GetWorldMatrix(void) { return worldMatrix; }
 	inline DirectX::XMFLOAT4X4 *GetWorldMatrixPtr(void) { return &worldMatrix; }
 	inline DirectX::XMFLOAT4X4 &GetViewProjMatrix(void) { return viewProj; }
+	inline void SetViewProjMatrix(DirectX::XMFLOAT4X4 view) { viewProj = view; }
 	inline RenderMaterial* GetRenderMaterial(void){ return renderMaterial; }
 	UINT getNumPrimitives(){return numPrimitives;}
 	D3D_PRIMITIVE_TOPOLOGY getPrimitiveType() { return primitiveType; }
 	UINT getStartVertex(){ return startVertex; }
 	UINT getstartIndex(){ return startIndex; }
 	UINT getNumVertices(){ return numVertices; }
-	static void RenderFunc(RenderNode& node);
+	void setNumPrimitives(UINT number){ numPrimitives = number; }
+	void setPrimitiveType(D3D_PRIMITIVE_TOPOLOGY top) { primitiveType = top; }
+	void setStartVertex(UINT start){ startVertex = start; }
+	void setstartIndex(UINT start){ startIndex = start; }
+	void setNumVertices(UINT num){ numVertices; }
+	static void RenderFunction(RenderNode& node);
 };
 

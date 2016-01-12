@@ -2,12 +2,16 @@
 #include <ctime>
 #include "Renderer.h"
 #include "RenderSet.h"
+#include "RenderContext.h"
+#include "RenderMaterial.h"
 #include <fbxsdk.h>
 #include "FBXLoader.h"
 #include <vector>
+#include "RenderShape.h"
 
 Renderer renderer;
 HINSTANCE application;
+RenderSet* renderset;
 void Init(HINSTANCE hinst, WNDPROC proc)
 {
 	application = hinst;
@@ -34,22 +38,63 @@ void Init(HINSTANCE hinst, WNDPROC proc)
 	ShowWindow(window, SW_SHOW);
 
 	renderer.Init(window);
+	FileInfo::ExporterHeader file;
+	std::vector<FileInfo::MyVertex> verticies;
+	file.FBXLoad("Box_Idle.fbx", &verticies);
+	renderset = new RenderSet;
+	RenderContext* renderContext = new RenderContext;
+	D3D11_BUFFER_DESC VertDesc;
+	ZeroMemory(&VertDesc, sizeof(VertDesc));
+	VertDesc.Usage = D3D11_USAGE_IMMUTABLE;
+	VertDesc.BindFlags = D3D11_BIND_VERTEX_BUFFER;
+	VertDesc.ByteWidth = sizeof(FileInfo::MyVertex) * verticies.size();
+	VertDesc.StructureByteStride = sizeof(FileInfo::MyVertex);
+	D3D11_SUBRESOURCE_DATA VertData;
+	ZeroMemory(&VertData, sizeof(VertData));
+	VertData.pSysMem = &verticies[0];
+	renderContext->setVertexBuffer(VertDesc, VertData, sizeof(FileInfo::MyVertex), 0);
+	D3D11_INPUT_ELEMENT_DESC layout[] =
+	{
+		{ "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+		{ "TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+		{ "NORMAL", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 }
+	};
+	renderContext->setVertexShader("VertexShader.cso");
+	renderContext->setPixelShader("PixelShader.cso");
+	renderContext->setInputLayout(layout, 3);
+	renderContext->RenderFunc = renderContext->RenderFunction;
+	renderContext->CreateRenderMaterials();
+	RenderMaterial* renderMaterial = new RenderMaterial;
+	renderMaterial->CreateTexture(L"TestCube.dds");
+	renderMaterial->RenderFunc = renderMaterial->RenderFunction;
+	renderMaterial->CreateRenderShapes();
+	renderContext->AddRenderMaterials((RenderNode*)renderMaterial);
+	RenderShape* renderShape = new RenderShape;
+	renderShape->SetWorldMatrix(DirectX::XMFLOAT4X4(1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 20, 1));
+	renderShape->RenderFunc = renderShape->RenderFunction;
+	renderShape->setNumPrimitives(verticies.size());
+	renderShape->setPrimitiveType(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+	renderShape->setstartIndex(0);
+	renderShape->setStartVertex(0);
+	DirectX::XMFLOAT4X4 matrix;
+	DirectX::XMStoreFloat4x4(&matrix, DirectX::XMMatrixPerspectiveFovLH(DirectX::XMConvertToRadians(300), 1, 0.1f, 1000.0f));
+	renderShape->SetViewProjMatrix(matrix);
+	renderMaterial->AddRenderShapes((RenderNode*)renderShape);
 
+	renderset->AddRenderNode((RenderNode*)renderContext);
 }
 
 bool Run()
 {
-	//RenderSet* renderset = nullptr;
-	//renderer.Render(renderset);
-	FileInfo::ExporterHeader file;
-	std::vector<FileInfo::MyVertex> positions;
-	file.FBXLoad("Box_Idle.fbx", &positions);
+	
+	renderer.Render(renderset);
 	return true;
 }
 
 void ShutDown()
 {
 	renderer.Shutdown();
+	delete renderset;
 	UnregisterClass(L"DirectXApplication", application);
 }
 

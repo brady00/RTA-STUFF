@@ -1,7 +1,7 @@
 #pragma once
 #include "RenderSet.h"
 
-class RenderMaterial
+class RenderMaterial : public RenderNode
 {
 protected:
 	RenderSet* renderShapes;
@@ -17,7 +17,7 @@ public:
 	inline void CreateRenderShapes(void){ renderShapes = new RenderSet; }
 	inline void AddRenderShapes(RenderNode* node){ renderShapes->AddRenderNode(node); }
 	inline void ClearRenderShapes(void){ renderShapes->ClearRenderSet(); }
-	void RenderFunc(RenderNode& node);
+	static void RenderFunction(RenderNode& node);
 	void CreateTexture(const WCHAR *buffer);
 
 };

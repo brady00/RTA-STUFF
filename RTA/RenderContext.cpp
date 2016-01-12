@@ -24,24 +24,29 @@ RenderContext::~RenderContext()
 	ReleaseCOM(IndexBuffer);
 	ReleaseCOM(VertexShader);
 	ReleaseCOM(PixelShader);
+
+	if (vertexShaderBuffer)
+		delete[] vertexShaderBuffer;
 }
 
-void RenderContext::RenderFunc(RenderNode& node)
+void RenderContext::RenderFunction(RenderNode& node)
 {
 	RenderContext &context = (RenderContext &)node;
-	Renderer::devicecontext->IASetInputLayout(inputLayout);
-	Renderer::devicecontext->IASetPrimitiveTopology(topology);
-	Renderer::devicecontext->IASetVertexBuffers(0, 1, &VertexBuffer, &stride, &offset);
-	Renderer::devicecontext->IASetIndexBuffer(IndexBuffer, DXGI_FORMAT_R32_UINT, 0);
-	Renderer::devicecontext->VSSetShader(VertexShader, NULL, 0);
-	Renderer::devicecontext->PSSetShader(PixelShader, NULL, 0);
-	Renderer::Render(renderMaterials);
+	Renderer::devicecontext->IASetInputLayout(context.inputLayout);
+	Renderer::devicecontext->IASetPrimitiveTopology(context.topology);
+	Renderer::devicecontext->IASetVertexBuffers(0, 1, &context.VertexBuffer, &context.stride, &context.offset);
+	Renderer::devicecontext->IASetIndexBuffer(context.IndexBuffer, DXGI_FORMAT_R32_UINT, 0);
+	Renderer::devicecontext->VSSetShader(context.VertexShader, NULL, 0);
+	Renderer::devicecontext->PSSetShader(context.PixelShader, NULL, 0);
+	Renderer::Render(context.renderMaterials);
 }
 
 void RenderContext::setVertexShader(char* filename)
 {
-	std::fstream load;
+	std::ifstream load;
 	load.open(filename, std::ios_base::binary);
+	if (!load.is_open())
+		return;
 	load.seekg(0, std::ios_base::end);
 	vertexShaderLength = size_t(load.tellg());
 	vertexShaderBuffer = new char[vertexShaderLength];
@@ -53,8 +58,10 @@ void RenderContext::setVertexShader(char* filename)
 
 void RenderContext::setPixelShader(char* filename)
 {
-	std::fstream load;
+	std::ifstream load;
 	load.open(filename, std::ios_base::binary);
+	if (!load.is_open())
+		return;
 	load.seekg(0, std::ios_base::end);
 	UINT size = size_t(load.tellg());
 	char* buffer = new char[size];
@@ -62,5 +69,6 @@ void RenderContext::setPixelShader(char* filename)
 	load.read(buffer, size);
 	load.close();
 	Renderer::device->CreatePixelShader(buffer, size, NULL, &PixelShader);
+	delete[] buffer;
 }
 

@@ -3,7 +3,6 @@
 #include "RenderNode.h"
 #include "Renderer.h"
 
-
 ID3D11Device * Renderer::device = 0;
 ID3D11DeviceContext * Renderer::devicecontext = 0;
 IDXGISwapChain * Renderer::swapchain = 0;
@@ -14,6 +13,7 @@ ID3D11DepthStencilView * Renderer::DepthStencilView = 0;
 ID3D11Buffer * Renderer::thePerObjectCBuffer = 0;
 cbPerObject Renderer::thePerObjectData;
 D3D11_VIEWPORT Renderer::viewport;
+ID3D11SamplerState* Renderer::sampler = 0;
 
 bool Renderer::Init(HWND win)
 {
@@ -57,6 +57,19 @@ bool Renderer::Init(HWND win)
 	stenview.ViewDimension = D3D11_DSV_DIMENSION_TEXTURE2D;
 	device->CreateDepthStencilView(DepthStencilBuffer, &stenview, &DepthStencilView);
 	BuildPerObjectConstantBuffers();
+	D3D11_SAMPLER_DESC desc2;
+	//anisoWrapSampler
+	desc2.Filter = D3D11_FILTER_ANISOTROPIC;
+	desc2.AddressU = D3D11_TEXTURE_ADDRESS_WRAP;
+	desc2.AddressV = D3D11_TEXTURE_ADDRESS_WRAP;
+	desc2.AddressW = D3D11_TEXTURE_ADDRESS_WRAP;
+	desc2.MipLODBias = 0.0f;
+	desc2.MaxAnisotropy = 4;
+	desc2.ComparisonFunc = D3D11_COMPARISON_NEVER;
+	desc2.BorderColor[0] = desc2.BorderColor[1] = desc2.BorderColor[2] = desc2.BorderColor[3] = 0;
+	desc2.MinLOD = -FLT_MAX;
+	desc2.MaxLOD = FLT_MAX;
+	Renderer::device->CreateSamplerState(&desc2, &sampler);
 	return true;
 }
 
@@ -67,6 +80,9 @@ bool Renderer::Render(RenderSet *set)
 	float color[4] = { 0, 0, 1, 0 };
 	devicecontext->ClearDepthStencilView(DepthStencilView, D3D11_CLEAR_DEPTH, 1, 0);
 	devicecontext->ClearRenderTargetView(RenderTargetView, color);
+	devicecontext->OMSetRenderTargets(1, &RenderTargetView, DepthStencilView);
+	devicecontext->RSSetViewports(1, &viewport);
+	devicecontext->PSSetSamplers(0, 1, &sampler);
 
 	RenderNode *pCurrent = set->GetHead();
 
@@ -92,6 +108,8 @@ bool Renderer::Shutdown()
 	ReleaseCOM(devicecontext);
 	ReleaseCOM(device);
 	ReleaseCOM(thePerObjectCBuffer);
+	ReleaseCOM(sampler);
+
 
 	return true;
 }
