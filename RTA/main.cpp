@@ -41,6 +41,8 @@ void Init(HINSTANCE hinst, WNDPROC proc)
 	FileInfo::ExporterHeader file;
 	std::vector<FileInfo::MyVertex> verticies;
 	file.FBXLoad("Box_Idle.fbx", &verticies);
+	file.FBXSave("Box_Idle.bin", verticies);
+
 	renderset = new RenderSet;
 	RenderContext* renderContext = new RenderContext;
 	D3D11_BUFFER_DESC VertDesc;

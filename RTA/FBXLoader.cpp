@@ -1,4 +1,5 @@
 #include "FBXLoader.h"
+#include <fstream>
 
 
 
@@ -102,5 +103,36 @@ bool FileInfo::ExporterHeader::FBXLoad(char * fileName, std::vector<MyVertex>* p
 		}
 
 	}
+	return true;
+}
+
+bool FileInfo::ExporterHeader::FBXSave(char * fileName, std::vector<MyVertex>& pinVertexVector)
+{
+	std::ofstream save;
+	save.open(fileName, std::ios_base::binary);
+	if (save.is_open())
+	{
+		unsigned int size = pinVertexVector.size();
+		save.write((char*)&size, sizeof(unsigned int));
+		for (unsigned int i = 0; i < size; i++)
+		{
+			save.write((char*)&(pinVertexVector)[i].pos[0], sizeof((pinVertexVector)[i].pos[0]));
+			save.write((char*)&(pinVertexVector)[i].pos[1], sizeof((pinVertexVector)[i].pos[1]));
+			save.write((char*)&(pinVertexVector)[i].pos[2], sizeof((pinVertexVector)[i].pos[2]));
+		}
+		for (unsigned int i = 0; i < size; i++)
+		{
+			save.write((char*)&(pinVertexVector)[i].uv[0], sizeof((pinVertexVector)[i].uv[0]));
+			save.write((char*)&(pinVertexVector)[i].uv[1], sizeof((pinVertexVector)[i].uv[1]));
+		}
+		for (unsigned int i = 0; i < size; i++)
+		{
+			save.write((char*)&(pinVertexVector)[i].normals[0], sizeof((pinVertexVector)[i].normals[0]));
+			save.write((char*)&(pinVertexVector)[i].normals[1], sizeof((pinVertexVector)[i].normals[1]));
+			save.write((char*)&(pinVertexVector)[i].normals[2], sizeof((pinVertexVector)[i].normals[2]));
+		}
+	}
+	else
+		return false;
 	return true;
 }

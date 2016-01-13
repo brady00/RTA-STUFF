@@ -71,6 +71,7 @@ namespace FileInfo
 		//FILE * mFilePointer;
 
 		bool FileInfo::ExporterHeader::FBXLoad( char * fileName, std::vector<MyVertex>* pOutVertexVector);
+		bool FileInfo::ExporterHeader::FBXSave(char * fileName, std::vector<MyVertex>& pinVertexVector);
 		//Used for reading in the header
 		ExporterHeader() {}
 		//used for writing out the header
