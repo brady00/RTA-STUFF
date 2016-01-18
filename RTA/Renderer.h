@@ -27,8 +27,9 @@ public:
 
 	Renderer(){};
 	~Renderer(){};
-	bool Init(HWND win);
+	static bool Init(HWND win);
 	static bool Render(RenderSet* set);
-	bool Shutdown();
+	static bool Present();
+	static bool Shutdown();
 };
 

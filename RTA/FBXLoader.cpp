@@ -54,10 +54,10 @@ bool FileInfo::ExporterHeader::FBXLoad(char * fileName, std::vector<MyVertex>* p
 
 			FbxVector4* pVertices = pMesh->GetControlPoints();
 
+			int lPolyIndexCounter = 0;
 			for (int j = 0; j < pMesh->GetPolygonCount(); j++)
 			{
 				int iNumVertices = pMesh->GetPolygonSize(j);
-
 
 				for (int k = 0; k < iNumVertices; k++)
 				{
@@ -65,14 +65,23 @@ bool FileInfo::ExporterHeader::FBXLoad(char * fileName, std::vector<MyVertex>* p
 
 					MyVertex vertex;
 					vertex.pos[0] = (float)pVertices[iControlPointIndex].mData[0];
+					vertex.pos[0] = -vertex.pos[0];
 					vertex.pos[1] = (float)pVertices[iControlPointIndex].mData[1];
+					vertex.pos[1] = -vertex.pos[1];
 					vertex.pos[2] = (float)pVertices[iControlPointIndex].mData[2];
 
-					FbxVector2 lUVValue;
 					int lPolyVertIndex = pMesh->GetPolygonVertex(j, k);
 					
 					int lUVIndex = lUseIndex ? lUVElement->GetIndexArray().GetAt(lPolyVertIndex) : lPolyVertIndex;
-					lUVValue = lUVElement->GetDirectArray().GetAt(lUVIndex);
+					const int lIndexCount = (lUseIndex) ? lUVElement->GetIndexArray().GetCount() : 0;
+					FbxVector2 lUVValue;
+					if (lPolyIndexCounter < lIndexCount)
+					{
+						int lUVIndex = lUseIndex ? lUVElement->GetIndexArray().GetAt(lPolyIndexCounter) : lPolyIndexCounter;
+						lUVValue = lUVElement->GetDirectArray().GetAt(lUVIndex);
+						lPolyIndexCounter++;
+					}
+					
 
 					//int lNormalIndex = 0;
 					//reference mode is direct, the normal index is same as vertex index.
@@ -92,6 +101,8 @@ bool FileInfo::ExporterHeader::FBXLoad(char * fileName, std::vector<MyVertex>* p
 					//FbxVector4 lNormal = lNormalElement->GetDirectArray().GetAt(k);
 					vertex.uv[0] = lUVValue.mData[0];
 					vertex.uv[1] = lUVValue.mData[1];
+					vertex.uv[1] = 1 - vertex.uv[1];
+					//vertex.uv[0] = 1 - vertex.uv[0];
 					vertex.normals[0] = lNormal.mData[0];
 					vertex.normals[1] = lNormal.mData[1];
 					vertex.normals[2] = lNormal.mData[2];

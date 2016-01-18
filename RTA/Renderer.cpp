@@ -17,7 +17,6 @@ ID3D11SamplerState* Renderer::sampler = 0;
 
 bool Renderer::Init(HWND win)
 {
-	window = win;
 	DXGI_SWAP_CHAIN_DESC desc;
 	ZeroMemory(&desc, sizeof(desc));
 	desc.BufferCount = 1;
@@ -26,9 +25,9 @@ bool Renderer::Init(HWND win)
 	desc.Flags = DXGI_SWAP_CHAIN_FLAG_ALLOW_MODE_SWITCH;
 	desc.BufferDesc.RefreshRate = { 1, 60 };
 	desc.BufferDesc.Height = 500;
-	desc.BufferDesc.Width = 500;
+	desc.BufferDesc.Width = 500;	
 	desc.SampleDesc.Count = 1;
-	desc.OutputWindow = window;
+	desc.OutputWindow = win;
 	desc.Windowed = true;
 	D3D11CreateDeviceAndSwapChain(NULL, D3D_DRIVER_TYPE::D3D_DRIVER_TYPE_HARDWARE, NULL, D3D11_CREATE_DEVICE_FLAG::D3D11_CREATE_DEVICE_DEBUG, NULL, NULL, D3D11_SDK_VERSION, &desc, &swapchain, &device, NULL, &devicecontext);
 	swapchain->GetBuffer(0, __uuidof(BackBuffer), reinterpret_cast<void**>(&BackBuffer));
@@ -92,8 +91,13 @@ bool Renderer::Render(RenderSet *set)
 		pCurrent = pCurrent->GetNext();
 	}
 
+	return true;
+}
+
+bool Renderer::Present()
+{
 	swapchain->Present(0, 0);
-	return false;
+	return true;
 }
 
 bool Renderer::Shutdown()

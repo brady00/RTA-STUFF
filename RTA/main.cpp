@@ -9,7 +9,6 @@
 #include <vector>
 #include "RenderShape.h"
 
-Renderer renderer;
 HINSTANCE application;
 RenderSet* renderset;
 void Init(HINSTANCE hinst, WNDPROC proc)
@@ -37,11 +36,11 @@ void Init(HINSTANCE hinst, WNDPROC proc)
 
 	ShowWindow(window, SW_SHOW);
 
-	renderer.Init(window);
+	Renderer::Init(window);
 	FileInfo::ExporterHeader file;
 	std::vector<FileInfo::MyVertex> verticies;
-	file.FBXLoad("Box_Idle.fbx", &verticies);
-	file.FBXSave("Box_Idle.bin", verticies);
+	file.FBXLoad("Teddy_Idle.fbx", &verticies);
+	file.FBXSave("Teddy_Idle.bin", verticies);
 
 	renderset = new RenderSet;
 	RenderContext* renderContext = new RenderContext;
@@ -67,12 +66,16 @@ void Init(HINSTANCE hinst, WNDPROC proc)
 	renderContext->RenderFunc = renderContext->RenderFunction;
 	renderContext->CreateRenderMaterials();
 	RenderMaterial* renderMaterial = new RenderMaterial;
-	renderMaterial->CreateTexture(L"TestCube.dds");
+	renderMaterial->CreateTexture(L"Teddy_D.dds");
 	renderMaterial->RenderFunc = renderMaterial->RenderFunction;
 	renderMaterial->CreateRenderShapes();
 	renderContext->AddRenderMaterials((RenderNode*)renderMaterial);
 	RenderShape* renderShape = new RenderShape;
-	renderShape->SetWorldMatrix(DirectX::XMFLOAT4X4(1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 20, 1));
+	
+	DirectX::XMMATRIX matrix2 = DirectX::XMMatrixMultiply(DirectX::XMMatrixRotationY(3.14), DirectX::XMLoadFloat4x4(&DirectX::XMFLOAT4X4(1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 100, 200, 1)));
+	DirectX::XMFLOAT4X4 world;
+	DirectX::XMStoreFloat4x4(&world, matrix2);
+	renderShape->SetWorldMatrix(world);
 	renderShape->RenderFunc = renderShape->RenderFunction;
 	renderShape->setNumPrimitives(verticies.size());
 	renderShape->setPrimitiveType(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
@@ -89,13 +92,14 @@ void Init(HINSTANCE hinst, WNDPROC proc)
 bool Run()
 {
 	
-	renderer.Render(renderset);
+	Renderer::Render(renderset);
+	Renderer::Present();
 	return true;
 }
 
 void ShutDown()
 {
-	renderer.Shutdown();
+	Renderer::Shutdown();
 	delete renderset;
 	UnregisterClass(L"DirectXApplication", application);
 }
