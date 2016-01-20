@@ -8,9 +8,13 @@
 #include "FBXLoader.h"
 #include <vector>
 #include "RenderShape.h"
+#include "Camera.h"
 
 HINSTANCE application;
 RenderSet* renderset;
+Camera* camera;
+DirectX::XMFLOAT4X4 cameraMatrix;
+
 void Init(HINSTANCE hinst, WNDPROC proc)
 {
 	application = hinst;
@@ -60,6 +64,7 @@ void Init(HINSTANCE hinst, WNDPROC proc)
 		{ "TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 },
 		{ "NORMAL", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 }
 	};
+
 	renderContext->setVertexShader("VertexShader.cso");
 	renderContext->setPixelShader("PixelShader.cso");
 	renderContext->setInputLayout(layout, 3);
@@ -82,17 +87,31 @@ void Init(HINSTANCE hinst, WNDPROC proc)
 	renderShape->setstartIndex(0);
 	renderShape->setStartVertex(0);
 	DirectX::XMFLOAT4X4 matrix;
+
 	DirectX::XMStoreFloat4x4(&matrix, DirectX::XMMatrixPerspectiveFovLH(DirectX::XMConvertToRadians(300), 1, 0.1f, 1000.0f));
 	renderShape->SetViewProjMatrix(matrix);
-	renderMaterial->AddRenderShapes((RenderNode*)renderShape);
+	cameraMatrix = matrix;
 
+	renderMaterial->AddRenderShapes((RenderNode*)renderShape);
+	
 	renderset->AddRenderNode((RenderNode*)renderContext);
+	camera->init();
+
 }
 
 bool Run()
 {
 	
 	Renderer::Render(renderset);
+	camera->CameraMovement(cameraMatrix);
+	
+
+	//float aspectRatio = 500.0f / 500.0f;
+	//
+	//camera->camera.viewMatrix = DirectX::XMMatrixIdentity();
+	//camera->camera.WorldMatrix = DirectX::XMMatrixIdentity();
+	//camera->camera.projMatrix = DirectX::XMMatrixPerspectiveFovLH(DirectX::XMConvertToRadians(75), aspectRatio, 0.1f, 1000.0f);
+
 	Renderer::Present();
 	return true;
 }
