@@ -5,8 +5,15 @@
 
 FbxManager* g_pFbxSdkManager = nullptr;
 
-bool FileInfo::ExporterHeader::FBXLoad(char * fileName, std::vector<MyVertex>* pOutVertexVector)
+bool FileInfo::ExporterHeader::FBXLoad(char * fileName, std::vector<MyVertex>* pOutVertexVector, char* binaryFile)
 {
+	std::ifstream binary;
+	binary.open(binaryFile, std::ios_base::binary);
+	if (binary.is_open())
+	{
+		binary.read((char*)&version, sizeof(version));
+		binary.read((char*)&updateTime, sizeof(updateTime));
+	}
 	if (g_pFbxSdkManager == nullptr)
 	{
 		g_pFbxSdkManager = FbxManager::Create();
@@ -17,6 +24,17 @@ bool FileInfo::ExporterHeader::FBXLoad(char * fileName, std::vector<MyVertex>* p
 
 	FbxImporter* pImporter = FbxImporter::Create(g_pFbxSdkManager, fileName);
 	FbxScene* pFbxScene = FbxScene::Create(g_pFbxSdkManager, fileName);
+	FbxIOFileHeaderInfo* header = pImporter->GetFileHeaderInfo();
+	if (header->mFileVersion != version)
+	{
+		if (header->mCreationTimeStampPresent)
+		{
+			if (header->mCreationTimeStamp.mSecond != updateTime)
+				return true;
+		}
+	}
+	version = header->mFileVersion;
+	updateTime = header->mCreationTimeStamp.mSecond;
 	FbxStringList UVsetNames;
 
 	bool bSuccess = pImporter->Initialize(fileName, -1, g_pFbxSdkManager->GetIOSettings());
@@ -123,6 +141,8 @@ bool FileInfo::ExporterHeader::FBXSave(char * fileName, std::vector<MyVertex>& p
 	save.open(fileName, std::ios_base::binary);
 	if (save.is_open())
 	{
+		save.write((char*)&version, sizeof(version));
+		save.write((char*)&updateTime, sizeof(version));
 		unsigned int size = pinVertexVector.size();
 		save.write((char*)&size, sizeof(unsigned int));
 		for (unsigned int i = 0; i < size; i++)
@@ -141,6 +161,39 @@ bool FileInfo::ExporterHeader::FBXSave(char * fileName, std::vector<MyVertex>& p
 			save.write((char*)&(pinVertexVector)[i].normals[0], sizeof((pinVertexVector)[i].normals[0]));
 			save.write((char*)&(pinVertexVector)[i].normals[1], sizeof((pinVertexVector)[i].normals[1]));
 			save.write((char*)&(pinVertexVector)[i].normals[2], sizeof((pinVertexVector)[i].normals[2]));
+		}
+	}
+	else
+		return false;
+	return true;
+}
+
+bool FileInfo::ExporterHeader::FBXRead(char * fileName, std::vector<MyVertex>& pinVertexVector)
+{
+	std::ifstream save;
+	save.open(fileName, std::ios_base::binary);
+	if (save.is_open())
+	{
+		save.read((char*)&version, sizeof(version));
+		save.read((char*)&updateTime, sizeof(version));
+		unsigned int size = pinVertexVector.size();
+		save.read((char*)&size, sizeof(unsigned int));
+		for (unsigned int i = 0; i < size; i++)
+		{
+			save.read((char*)&(pinVertexVector)[i].pos[0], sizeof((pinVertexVector)[i].pos[0]));
+			save.read((char*)&(pinVertexVector)[i].pos[1], sizeof((pinVertexVector)[i].pos[1]));
+			save.read((char*)&(pinVertexVector)[i].pos[2], sizeof((pinVertexVector)[i].pos[2]));
+		}
+		for (unsigned int i = 0; i < size; i++)
+		{
+			save.read((char*)&(pinVertexVector)[i].uv[0], sizeof((pinVertexVector)[i].uv[0]));
+			save.read((char*)&(pinVertexVector)[i].uv[1], sizeof((pinVertexVector)[i].uv[1]));
+		}
+		for (unsigned int i = 0; i < size; i++)
+		{
+			save.read((char*)&(pinVertexVector)[i].normals[0], sizeof((pinVertexVector)[i].normals[0]));
+			save.read((char*)&(pinVertexVector)[i].normals[1], sizeof((pinVertexVector)[i].normals[1]));
+			save.read((char*)&(pinVertexVector)[i].normals[2], sizeof((pinVertexVector)[i].normals[2]));
 		}
 	}
 	else

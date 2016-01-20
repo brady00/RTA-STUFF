@@ -24,6 +24,7 @@ RenderContext::~RenderContext()
 	ReleaseCOM(IndexBuffer);
 	ReleaseCOM(VertexShader);
 	ReleaseCOM(PixelShader);
+	ReleaseCOM(rasterState);
 
 	if (vertexShaderBuffer)
 		delete[] vertexShaderBuffer;
@@ -38,6 +39,7 @@ void RenderContext::RenderFunction(RenderNode& node)
 	Renderer::devicecontext->IASetIndexBuffer(context.IndexBuffer, DXGI_FORMAT_R32_UINT, 0);
 	Renderer::devicecontext->VSSetShader(context.VertexShader, NULL, 0);
 	Renderer::devicecontext->PSSetShader(context.PixelShader, NULL, 0);
+	Renderer::devicecontext->RSSetState(context.rasterState);
 	Renderer::Render(context.renderMaterials);
 }
 

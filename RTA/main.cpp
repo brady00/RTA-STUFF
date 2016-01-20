@@ -8,12 +8,14 @@
 #include "FBXLoader.h"
 #include <vector>
 #include "RenderShape.h"
+#include "skybox.h"
 #include "Camera.h"
 
 HINSTANCE application;
 RenderSet* renderset;
 Camera* camera;
 DirectX::XMFLOAT4X4 cameraMatrix;
+skybox SkyBox;
 
 void Init(HINSTANCE hinst, WNDPROC proc)
 {
@@ -42,22 +44,22 @@ void Init(HINSTANCE hinst, WNDPROC proc)
 
 	Renderer::Init(window);
 	FileInfo::ExporterHeader file;
-	std::vector<FileInfo::MyVertex> verticies;
-	file.FBXLoad("Teddy_Idle.fbx", &verticies);
-	file.FBXSave("Teddy_Idle.bin", verticies);
-
+	std::vector<MyVertex> verticies;
+	if(file.FBXLoad("Teddy_Idle.fbx", &verticies, "Teddy_Idle.bin"))
+		file.FBXSave("Teddy_Idle.bin", verticies);
+	file.FBXRead("Teddy_Idle.bin", verticies);
 	renderset = new RenderSet;
 	RenderContext* renderContext = new RenderContext;
 	D3D11_BUFFER_DESC VertDesc;
 	ZeroMemory(&VertDesc, sizeof(VertDesc));
 	VertDesc.Usage = D3D11_USAGE_IMMUTABLE;
 	VertDesc.BindFlags = D3D11_BIND_VERTEX_BUFFER;
-	VertDesc.ByteWidth = sizeof(FileInfo::MyVertex) * verticies.size();
-	VertDesc.StructureByteStride = sizeof(FileInfo::MyVertex);
+	VertDesc.ByteWidth = sizeof(MyVertex) * verticies.size();
+	VertDesc.StructureByteStride = sizeof(MyVertex);
 	D3D11_SUBRESOURCE_DATA VertData;
 	ZeroMemory(&VertData, sizeof(VertData));
 	VertData.pSysMem = &verticies[0];
-	renderContext->setVertexBuffer(VertDesc, VertData, sizeof(FileInfo::MyVertex), 0);
+	renderContext->setVertexBuffer(VertDesc, VertData, sizeof(MyVertex), 0);
 	D3D11_INPUT_ELEMENT_DESC layout[] =
 	{
 		{ "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 },
@@ -70,6 +72,13 @@ void Init(HINSTANCE hinst, WNDPROC proc)
 	renderContext->setInputLayout(layout, 3);
 	renderContext->RenderFunc = renderContext->RenderFunction;
 	renderContext->CreateRenderMaterials();
+	D3D11_RASTERIZER_DESC desc;
+	ZeroMemory(&desc, sizeof(desc));
+	desc.FrontCounterClockwise = false;
+	desc.FillMode = D3D11_FILL_SOLID;
+	desc.CullMode = D3D11_CULL_NONE;
+	desc.DepthClipEnable = false;
+	renderContext->setRasterizerState(desc);
 	RenderMaterial* renderMaterial = new RenderMaterial;
 	renderMaterial->CreateTexture(L"Teddy_D.dds");
 	renderMaterial->RenderFunc = renderMaterial->RenderFunction;
@@ -87,24 +96,25 @@ void Init(HINSTANCE hinst, WNDPROC proc)
 	renderShape->setstartIndex(0);
 	renderShape->setStartVertex(0);
 	DirectX::XMFLOAT4X4 matrix;
-
-	DirectX::XMStoreFloat4x4(&matrix, DirectX::XMMatrixPerspectiveFovLH(DirectX::XMConvertToRadians(300), 1, 0.1f, 1000.0f));
+	camera->init();
+	DirectX::XMStoreFloat4x4(&matrix , XMMatrixMultiply(XMLoadFloat4x4(camera->viewMatrix), XMLoadFloat4x4(camera->projMatrix)));
 	renderShape->SetViewProjMatrix(matrix);
-	cameraMatrix = matrix;
+	//cameraMatrix = matrix;
 
 	renderMaterial->AddRenderShapes((RenderNode*)renderShape);
 	
 	renderset->AddRenderNode((RenderNode*)renderContext);
-	camera->init();
 
+	SkyBox.Create();
 }
 
 bool Run()
 {
 	
+	SkyBox.Render();
 	Renderer::Render(renderset);
-	camera->CameraMovement(cameraMatrix);
-	
+	//camera->CameraMovement(cameraMatrix);
+	//RenderShape::GetViewProjMatrix
 
 	//float aspectRatio = 500.0f / 500.0f;
 	//
