@@ -44,6 +44,26 @@ void Init(HINSTANCE hinst, WNDPROC proc)
 	if(file.FBXLoad("Teddy_Idle.fbx", &verticies, "Teddy_Idle.bin"))
 		file.FBXSave("Teddy_Idle.bin", verticies);
 	file.FBXRead("Teddy_Idle.bin", verticies);
+	for (unsigned int i = 0; i < verticies.size(); i+=3)
+	{
+		DirectX::XMFLOAT3 first = DirectX::XMFLOAT3(verticies[i].pos);
+		DirectX::XMFLOAT3 second = DirectX::XMFLOAT3(verticies[i + 1].pos);
+		DirectX::XMFLOAT3 third = DirectX::XMFLOAT3(verticies[i + 2].pos);
+		DirectX::XMVECTOR dir1 = DirectX::XMVectorSubtract(DirectX::XMLoadFloat3(&first), DirectX::XMLoadFloat3(&second));
+		DirectX::XMVECTOR dir2 = DirectX::XMVectorSubtract(DirectX::XMLoadFloat3(&second), DirectX::XMLoadFloat3(&third));
+		DirectX::XMFLOAT3 normal;
+		DirectX::XMStoreFloat3(&normal, DirectX::XMVector3Cross(dir2, dir1));
+		verticies[i].normals[0] = normal.x;
+		verticies[i].normals[1] = normal.y;
+		verticies[i].normals[2] = normal.z;
+
+		verticies[i+1].normals[0] = normal.x;
+		verticies[i+1].normals[1] = normal.y;
+		verticies[i+1].normals[2] = normal.z;
+		verticies[i+2].normals[0] = normal.x;
+		verticies[i+2].normals[1] = normal.y;
+		verticies[i+2].normals[2] = normal.z;
+	}
 	renderset = new RenderSet;
 	RenderContext* renderContext = new RenderContext;
 	D3D11_BUFFER_DESC VertDesc;

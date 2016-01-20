@@ -2,7 +2,6 @@
 #include <fstream>
 
 
-
 FbxManager* g_pFbxSdkManager = nullptr;
 
 bool FileInfo::ExporterHeader::FBXLoad(char * fileName, std::vector<MyVertex>* pOutVertexVector, char* binaryFile)
@@ -121,6 +120,8 @@ bool FileInfo::ExporterHeader::FBXLoad(char * fileName, std::vector<MyVertex>* p
 					vertex.uv[1] = lUVValue.mData[1];
 					vertex.uv[1] = 1 - vertex.uv[1];
 					//vertex.uv[0] = 1 - vertex.uv[0];
+
+					
 					vertex.normals[0] = lNormal.mData[0];
 					vertex.normals[1] = lNormal.mData[1];
 					vertex.normals[2] = lNormal.mData[2];

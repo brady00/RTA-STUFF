@@ -6,6 +6,7 @@
 #include <memory.h>
 #include <stdint.h>
 #include <sys/stat.h>
+
 #include <fbxsdk.h>
 #pragma comment(lib, "libfbxsdk.dll")
 #include <time.h>
