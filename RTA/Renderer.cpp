@@ -69,19 +69,19 @@ bool Renderer::Init(HWND win)
 	desc2.MinLOD = -FLT_MAX;
 	desc2.MaxLOD = FLT_MAX;
 	Renderer::device->CreateSamplerState(&desc2, &sampler);
-	return true;
-}
-
-bool Renderer::Render(RenderSet *set)
-{
 	devicecontext->OMSetRenderTargets(1, &RenderTargetView, DepthStencilView);
-	
+
 	float color[4] = { 0, 0, 1, 0 };
 	devicecontext->ClearDepthStencilView(DepthStencilView, D3D11_CLEAR_DEPTH, 1, 0);
 	devicecontext->ClearRenderTargetView(RenderTargetView, color);
 	devicecontext->OMSetRenderTargets(1, &RenderTargetView, DepthStencilView);
 	devicecontext->RSSetViewports(1, &viewport);
 	devicecontext->PSSetSamplers(0, 1, &sampler);
+	return true;
+}
+
+bool Renderer::Render(RenderSet *set)
+{
 
 	RenderNode *pCurrent = set->GetHead();
 

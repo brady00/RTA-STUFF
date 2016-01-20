@@ -10,6 +10,7 @@
 #pragma comment(lib, "libfbxsdk.dll")
 #include <time.h>
 #include <vector>
+#include "VeretxStructures.h"
 //--------------------------------------------------------------------------------
 
 //Change this when any changes are done to the struct ExporterHeader
@@ -22,12 +23,6 @@ namespace FileInfo
 	enum class MODEL_TYPES : int8_t { COLOR, TEXTURE, TEXTURE_LIT, NORMALMAP, NORMALMAP_ANIMATED, BASIC, MAX_TYPES };
 	enum class INDEX_TYPES : int8_t { INDEX32, INDEX16, TRI_STRIP };
 
-	struct MyVertex
-	{
-		float pos[3];
-		float uv[2];
-		float normals[3];
-	};
 	struct ExporterHeader
 	{
 		union
@@ -70,8 +65,9 @@ namespace FileInfo
 		
 		//FILE * mFilePointer;
 
-		bool FileInfo::ExporterHeader::FBXLoad( char * fileName, std::vector<MyVertex>* pOutVertexVector);
+		bool FileInfo::ExporterHeader::FBXLoad( char * fileName, std::vector<MyVertex>* pOutVertexVector, char* binaryFile);
 		bool FileInfo::ExporterHeader::FBXSave(char * fileName, std::vector<MyVertex>& pinVertexVector);
+		bool FileInfo::ExporterHeader::FBXRead(char * fileName, std::vector<MyVertex>& pinVertexVector);
 		//Used for reading in the header
 		ExporterHeader() {}
 		//used for writing out the header

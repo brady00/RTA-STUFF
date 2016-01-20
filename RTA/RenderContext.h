@@ -15,6 +15,7 @@ protected:
 	ID3D11Buffer* IndexBuffer;
 	ID3D11VertexShader* VertexShader;
 	ID3D11PixelShader* PixelShader;
+	ID3D11RasterizerState* rasterState;
 	char* vertexShaderBuffer = 0;
 	UINT vertexShaderLength;
 
@@ -33,6 +34,7 @@ public:
 	inline void setTopology(D3D11_PRIMITIVE_TOPOLOGY topology) { this->topology = topology; }
 	inline void setVertexBuffer(D3D11_BUFFER_DESC desc, D3D11_SUBRESOURCE_DATA data, UINT stride, UINT offset) { Renderer::device->CreateBuffer(&desc, &data, &VertexBuffer); this->stride = stride; this->offset = offset; }
 	inline void setIndexBuffer(D3D11_BUFFER_DESC desc, D3D11_SUBRESOURCE_DATA data) { Renderer::device->CreateBuffer(&desc, &data, &IndexBuffer); }
+	inline void setRasterizerState(D3D11_RASTERIZER_DESC desc){ Renderer::device->CreateRasterizerState(&desc, &rasterState); }
 	void setVertexShader(char* filename);
 	void setPixelShader(char* filename);
 };

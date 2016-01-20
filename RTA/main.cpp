@@ -8,9 +8,11 @@
 #include "FBXLoader.h"
 #include <vector>
 #include "RenderShape.h"
+#include "skybox.h"
 
 HINSTANCE application;
 RenderSet* renderset;
+skybox SkyBox;
 void Init(HINSTANCE hinst, WNDPROC proc)
 {
 	application = hinst;
@@ -38,22 +40,22 @@ void Init(HINSTANCE hinst, WNDPROC proc)
 
 	Renderer::Init(window);
 	FileInfo::ExporterHeader file;
-	std::vector<FileInfo::MyVertex> verticies;
-	file.FBXLoad("Teddy_Idle.fbx", &verticies);
-	file.FBXSave("Teddy_Idle.bin", verticies);
-
+	std::vector<MyVertex> verticies;
+	if(file.FBXLoad("Teddy_Idle.fbx", &verticies, "Teddy_Idle.bin"))
+		file.FBXSave("Teddy_Idle.bin", verticies);
+	file.FBXRead("Teddy_Idle.bin", verticies);
 	renderset = new RenderSet;
 	RenderContext* renderContext = new RenderContext;
 	D3D11_BUFFER_DESC VertDesc;
 	ZeroMemory(&VertDesc, sizeof(VertDesc));
 	VertDesc.Usage = D3D11_USAGE_IMMUTABLE;
 	VertDesc.BindFlags = D3D11_BIND_VERTEX_BUFFER;
-	VertDesc.ByteWidth = sizeof(FileInfo::MyVertex) * verticies.size();
-	VertDesc.StructureByteStride = sizeof(FileInfo::MyVertex);
+	VertDesc.ByteWidth = sizeof(MyVertex) * verticies.size();
+	VertDesc.StructureByteStride = sizeof(MyVertex);
 	D3D11_SUBRESOURCE_DATA VertData;
 	ZeroMemory(&VertData, sizeof(VertData));
 	VertData.pSysMem = &verticies[0];
-	renderContext->setVertexBuffer(VertDesc, VertData, sizeof(FileInfo::MyVertex), 0);
+	renderContext->setVertexBuffer(VertDesc, VertData, sizeof(MyVertex), 0);
 	D3D11_INPUT_ELEMENT_DESC layout[] =
 	{
 		{ "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 },
@@ -65,6 +67,13 @@ void Init(HINSTANCE hinst, WNDPROC proc)
 	renderContext->setInputLayout(layout, 3);
 	renderContext->RenderFunc = renderContext->RenderFunction;
 	renderContext->CreateRenderMaterials();
+	D3D11_RASTERIZER_DESC desc;
+	ZeroMemory(&desc, sizeof(desc));
+	desc.FrontCounterClockwise = false;
+	desc.FillMode = D3D11_FILL_SOLID;
+	desc.CullMode = D3D11_CULL_NONE;
+	desc.DepthClipEnable = false;
+	renderContext->setRasterizerState(desc);
 	RenderMaterial* renderMaterial = new RenderMaterial;
 	renderMaterial->CreateTexture(L"Teddy_D.dds");
 	renderMaterial->RenderFunc = renderMaterial->RenderFunction;
@@ -87,11 +96,13 @@ void Init(HINSTANCE hinst, WNDPROC proc)
 	renderMaterial->AddRenderShapes((RenderNode*)renderShape);
 
 	renderset->AddRenderNode((RenderNode*)renderContext);
+	SkyBox.Create();
 }
 
 bool Run()
 {
 	
+	SkyBox.Render();
 	Renderer::Render(renderset);
 	Renderer::Present();
 	return true;
