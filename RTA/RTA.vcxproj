@@ -84,6 +84,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Camera.cpp" />
     <ClCompile Include="DDSTextureLoader.cpp" />
     <ClCompile Include="FBXLoader.cpp" />
     <ClCompile Include="main.cpp" />
@@ -95,6 +96,7 @@
     <ClCompile Include="skybox.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Camera.h" />
     <ClInclude Include="ConstantBuffers.h" />
     <ClInclude Include="DDSTextureLoader.h" />
     <ClInclude Include="FBXLoader.h" />
