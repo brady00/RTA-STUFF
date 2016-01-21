@@ -16,7 +16,10 @@ VertexOut main(VertexIn input)
 {
 	VertexOut output;
 
-	output.position = mul(float4(input.position, 1.0), gMVP);
+	//float4x4 view = mul(gView, float4x4(100, 0, 0, 0, 0, 100, 0, 0, 0, 0, 100, 0, 0, 0, 0, 100));
+	output.position = mul(float4(input.position, 1.0), gWorld);
+	output.position = mul(output.position, gView);
+	output.position = mul(output.position, gProj);
 	output.UV = input.position * 2;
 
 	return output;

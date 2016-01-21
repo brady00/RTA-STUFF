@@ -37,15 +37,17 @@ bool skybox::Create()
 	renderMaterial->CreateRenderShapes();
 	renderContext->AddRenderMaterials((RenderNode*)renderMaterial);
 	RenderShape* renderShape = new RenderShape;
-	renderShape->SetWorldMatrix(DirectX::XMFLOAT4X4(1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1));
 	renderShape->RenderFunc = renderShape->RenderFunction;
 	renderShape->setNumPrimitives(verticies.size());
 	renderShape->setPrimitiveType(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 	renderShape->setstartIndex(0);
 	renderShape->setStartVertex(0);
-	DirectX::XMFLOAT4X4 matrix;
-	DirectX::XMStoreFloat4x4(&matrix, DirectX::XMMatrixPerspectiveFovLH(DirectX::XMConvertToRadians(300), 1, 0.1f, 1000.0f));
-	renderShape->SetViewProjMatrix(matrix);
+
+	renderShape->SetWorldMatrix(Renderer::camera->invViewMatrix);
+
+	renderShape->SetViewMatrix(Renderer::camera->viewMatrix);
+	renderShape->SetProjMatrix(Renderer::camera->projMatrix);
+
 	renderMaterial->AddRenderShapes((RenderNode*)renderShape);
 
 	renderSet->AddRenderNode((RenderNode*)renderContext);

@@ -8,6 +8,9 @@ Camera::Camera()
 
 Camera::~Camera()
 {
+	delete projMatrix;
+	delete viewMatrix;
+	delete invViewMatrix;
 }
 
 void Camera::init()
@@ -69,72 +72,49 @@ void Camera::init()
 #pragma endregion
 	//workingResult = Renderer::device->CreateBuffer(&sCBuff, &scs, &cBuffer);
 
-
-	*viewMatrix = XMFLOAT4X4(1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1);
-	XMStoreFloat4x4(projMatrix,XMMatrixPerspectiveFovLH(90, 100, 0, 1));
+	viewMatrix = new XMFLOAT4X4(1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, -20, 1);
+	invViewMatrix = new XMFLOAT4X4(1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, -20, 1);
+	DirectX::XMStoreFloat4x4(viewMatrix, DirectX::XMMatrixInverse(&DirectX::XMMatrixDeterminant(DirectX::XMLoadFloat4x4(viewMatrix)), DirectX::XMLoadFloat4x4(viewMatrix)));
+	projMatrix = new XMFLOAT4X4();
+	XMStoreFloat4x4(projMatrix,XMMatrixPerspectiveFovLH(3.14f/2, 1, 0.1f, 1000));
 }
 
-void Camera::CameraMovement(XMFLOAT4X4 camIn)
+void Camera::CameraMovement()
 {
-	//camera.viewMatrix = camIn;
-
+	//camera.&viewmatrix = camIn;
+	GetCursorPos(&prevCursor);
 	float x = 0, y = 0, z = 0;
 
-	/*if (GetAsyncKeyState(VK_RIGHT))
-	{
-	camera.viewMatrix = DirectX::XMMatrixMultiply(XMMatrixRotationY(0.002f), camera.viewMatrix);
-	}
-
-	if (GetAsyncKeyState(VK_LEFT))
-	{
-
-	camera.viewMatrix = DirectX::XMMatrixMultiply(XMMatrixRotationY(-0.002f), camera.viewMatrix);
-	}
-
-	if (GetAsyncKeyState('W'))
-	{
-	y += 0.001f;
-	camera.viewMatrix = XMMatrixMultiply(XMMatrixTranslation(0, y, 0), camera.viewMatrix);
-	}
-	if (GetAsyncKeyState('A'))
-	{
-	x -= 0.001f;
-	camera.viewMatrix = DirectX::XMMatrixMultiply(XMMatrixTranslation(x, 0, 0), camera.viewMatrix);
-
-	}
-	if (GetAsyncKeyState('S'))
-	{
-	y -= 0.001f;
-	camera.viewMatrix = DirectX::XMMatrixMultiply(XMMatrixTranslation(0, y, 0), camera.viewMatrix);
-	}
 	if (GetAsyncKeyState('D'))
+		XMStoreFloat4x4(viewMatrix, DirectX::XMMatrixMultiply(XMMatrixTranslation(-0.002f, 0, 0), XMLoadFloat4x4(viewMatrix)));
+	if (GetAsyncKeyState('A'))
+		XMStoreFloat4x4(viewMatrix, DirectX::XMMatrixMultiply(XMMatrixTranslation(0.002f, 0, 0), XMLoadFloat4x4(viewMatrix)));
+	if (GetAsyncKeyState('W'))
+		XMStoreFloat4x4(viewMatrix, DirectX::XMMatrixMultiply(XMMatrixTranslation(0, 0, -0.002f), XMLoadFloat4x4(viewMatrix)));
+	if (GetAsyncKeyState('S'))
+		XMStoreFloat4x4(viewMatrix, DirectX::XMMatrixMultiply(XMMatrixTranslation(0, 0, 0.002f), XMLoadFloat4x4(viewMatrix)));
+	//if (GetAsyncKeyState(RI_MOUSE_LEFT_BUTTON_DOWN))
+	//{
+	//	POINT mouse;
+	//	GetCursorPos(&mouse);
+	//	int x = mouse.x - prevCursor.x;
+	//	int y = mouse.y - prevCursor.y;
+	//	if (x != 0)
+	//		XMStoreFloat4x4(viewMatrix, DirectX::XMMatrixMultiply(XMMatrixRotationY(x), XMLoadFloat4x4(viewMatrix)));
+	//	if (y != 0)																  
+	//		XMStoreFloat4x4(viewMatrix, DirectX::XMMatrixMultiply(XMMatrixRotationX(y), XMLoadFloat4x4(viewMatrix)));
+	//
+	//}
+	DirectX::XMStoreFloat4x4(invViewMatrix, DirectX::XMMatrixInverse(&DirectX::XMMatrixDeterminant(DirectX::XMLoadFloat4x4(viewMatrix)), DirectX::XMLoadFloat4x4(viewMatrix)));
+	for (unsigned int i = 0; i < 3; i++)
 	{
-	x += 0.001f;
-	camera.viewMatrix = DirectX::XMMatrixMultiply(XMMatrixTranslation(x, 0, 0), camera.viewMatrix);
+		for (unsigned int j = 0; j < 3; j++)
+		{
+			invViewMatrix->m[i][j] = 0;
+			if (i == j)
+				invViewMatrix->m[i][j] = 1;
+		}
 	}
-	if (GetAsyncKeyState(VK_UP))
-	{
-	z += 0.002f;
-	camera.viewMatrix = DirectX::XMMatrixMultiply(XMMatrixTranslation(0, 0, z), camera.viewMatrix);
-	}
-	if (GetAsyncKeyState(VK_DOWN))
-	{
-	z -= 0.002f;
-	camera.viewMatrix = DirectX::XMMatrixMultiply(XMMatrixTranslation(0, 0, z), camera.viewMatrix);
-	}
-	if (GetAsyncKeyState(VK_UP) && GetAsyncKeyState(VK_SHIFT))
-	{
-	XMMATRIX temp;
-	temp = DirectX::XMMatrixMultiply(DirectX::XMMatrixRotationX(-0.002f), XMMatrixIdentity());
-	camera.viewMatrix = DirectX::XMMatrixMultiply(temp, camera.viewMatrix);
-	}
-	if (GetAsyncKeyState(VK_DOWN) && GetAsyncKeyState(VK_SHIFT))
-	{
-	XMMATRIX temp;
-	temp = DirectX::XMMatrixMultiply(DirectX::XMMatrixRotationX(0.002f), XMMatrixIdentity());
-	camera.viewMatrix = DirectX::XMMatrixMultiply(temp, camera.viewMatrix);
-	}*/
-
 }
 
 
@@ -144,7 +124,7 @@ void Camera::CameraMovement(XMFLOAT4X4 camIn)
 //	mPosition = XMFLOAT3(0.0f, 0.0f, -1.0f);
 //	mTarget = XMFLOAT3(0.0f, 0.0f, 0.0f);
 //	mUp = GMathVF(GMathFV(mPosition) + GMathFV(XMFLOAT3(0, 1, 0)));
-//	this->initViewMatrix();
+//	this->init&viewmatrix();
 //
 //	mAngle = 0.0f;
 //	mClientWidth = 0.0f;
@@ -180,7 +160,7 @@ void Camera::CameraMovement(XMFLOAT4X4 camIn)
 //	return *this;
 //}
 //
-//void GCamera::initViewMatrix()
+//void GCamera::init&viewmatrix()
 //{
 //	XMStoreFloat4x4(&mView, XMMatrixLookAtLH(XMLoadFloat3(&mPosition), XMLoadFloat3(&mTarget),
 //		XMLoadFloat3(&this->Up())));
@@ -207,7 +187,7 @@ void Camera::CameraMovement(XMFLOAT4X4 camIn)
 //	mUp = GMathVF(XMVector3Transform(GMathFV(mUp),
 //		XMMatrixTranslation(direction.x, direction.y, direction.z)));
 //
-//	this->initViewMatrix();
+//	this->init&viewmatrix();
 //}
 //
 //void GCamera::Rotate(XMFLOAT3 axis, float degrees)
@@ -228,7 +208,7 @@ void Camera::CameraMovement(XMFLOAT4X4 camIn)
 //	mTarget = GMathVF(GMathFV(mPosition) + GMathFV(look_at_target));
 //	mUp = GMathVF(GMathFV(mPosition) + GMathFV(look_at_up));
 //
-//	this->initViewMatrix();
+//	this->init&viewmatrix();
 //}
 //
 //void GCamera::Target(XMFLOAT3 new_target)
@@ -242,13 +222,13 @@ void Camera::CameraMovement(XMFLOAT4X4 camIn)
 //	float angle = XMConvertToDegrees(XMVectorGetX(
 //		XMVector3AngleBetweenNormals(XMVector3Normalize(GMathFV(old_look_at_target)),
 //		XMVector3Normalize(GMathFV(new_look_at_target)))));
-//	if (angle != 0.0f && angle != 360.0f && angle != 180.0f)
+//	if (angle != 0.0f  angle != 360.0f  angle != 180.0f)
 //	{
 //		XMVECTOR axis = XMVector3Cross(GMathFV(old_look_at_target), GMathFV(new_look_at_target));
 //		Rotate(GMathVF(axis), angle);
 //	}
 //	mTarget = new_target;
-//	this->initViewMatrix();
+//	this->init&viewmatrix();
 //}
 
 // Set camera position

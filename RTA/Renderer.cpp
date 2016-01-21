@@ -14,6 +14,7 @@ ID3D11Buffer * Renderer::thePerObjectCBuffer = 0;
 cbPerObject Renderer::thePerObjectData;
 D3D11_VIEWPORT Renderer::viewport;
 ID3D11SamplerState* Renderer::sampler = 0;
+Camera* Renderer::camera = 0;
 
 bool Renderer::Init(HWND win)
 {
@@ -77,6 +78,8 @@ bool Renderer::Init(HWND win)
 	devicecontext->OMSetRenderTargets(1, &RenderTargetView, DepthStencilView);
 	devicecontext->RSSetViewports(1, &viewport);
 	devicecontext->PSSetSamplers(0, 1, &sampler);
+	camera = new Camera();
+	camera->init();
 	return true;
 }
 
@@ -114,7 +117,7 @@ bool Renderer::Shutdown()
 	ReleaseCOM(thePerObjectCBuffer);
 	ReleaseCOM(sampler);
 
-
+	delete camera;
 	return true;
 }
 
@@ -131,9 +134,10 @@ void Renderer::BuildPerObjectConstantBuffers()
 
 }
 
-void Renderer::SetPerObjectData(DirectX::XMFLOAT4X4 &mMVP, DirectX::XMFLOAT4X4 &mWorld)
+void Renderer::SetPerObjectData(DirectX::XMFLOAT4X4 *mView, DirectX::XMFLOAT4X4 *mProj, DirectX::XMFLOAT4X4 &mWorld)
 {
-	thePerObjectData.gMVP = mMVP;
+	thePerObjectData.gView = *mView;
+	thePerObjectData.gProj = *mProj;
 	thePerObjectData.gWorld = mWorld;
 
 	D3D11_MAPPED_SUBRESOURCE edit;

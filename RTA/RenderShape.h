@@ -13,21 +13,22 @@ protected:
 	UINT                        startIndex;
 	UINT                        numVertices;
 	RenderMaterial* renderMaterial;
-	DirectX::XMFLOAT4X4 worldMatrix;
-	DirectX::XMFLOAT4X4 viewProj;
+	DirectX::XMFLOAT4X4* worldMatrix;
+	DirectX::XMFLOAT4X4* view;
+	DirectX::XMFLOAT4X4* proj;
 private:
 
 public:
-	RenderShape(){};
-	~RenderShape(){};
-	inline void Initialize(DirectX::XMFLOAT4X4 *localMatrix) {worldMatrix = *localMatrix;};
+	RenderShape(){ worldMatrix = new DirectX::XMFLOAT4X4(); }
+	~RenderShape(){}
+	inline void Initialize(DirectX::XMFLOAT4X4 *localMatrix) {worldMatrix = localMatrix;};
 	inline void AddToMaterialSet(RenderMaterial *material){ material->getRenderShapes()->AddRenderNode(this); };
-	inline void SetWorldMatrix(const DirectX::XMFLOAT4X4 &mat) { worldMatrix = mat; }
-	inline void SetWorldMatrix(const DirectX::XMFLOAT4X4 *mat) { worldMatrix = *mat; }
-	inline DirectX::XMFLOAT4X4 &GetWorldMatrix(void) { return worldMatrix; }
-	inline DirectX::XMFLOAT4X4 *GetWorldMatrixPtr(void) { return &worldMatrix; }
-	inline DirectX::XMFLOAT4X4 &GetViewProjMatrix(void) { return viewProj; }
-	inline void SetViewProjMatrix(DirectX::XMFLOAT4X4 view) { viewProj = view; }
+	inline void SetWorldMatrix(DirectX::XMFLOAT4X4 *mat) { worldMatrix = mat; }
+	inline DirectX::XMFLOAT4X4 *GetWorldMatrixPtr(void) { return worldMatrix; }
+	inline DirectX::XMFLOAT4X4* GetViewMatrix(void) { return view; }
+	inline void SetViewMatrix(DirectX::XMFLOAT4X4* vie) { view = vie; }
+	inline DirectX::XMFLOAT4X4* GetProjMatrix(void) { return proj; }
+	inline void SetProjMatrix(DirectX::XMFLOAT4X4* pro) { proj = pro; }
 	inline RenderMaterial* GetRenderMaterial(void){ return renderMaterial; }
 	UINT getNumPrimitives(){return numPrimitives;}
 	D3D_PRIMITIVE_TOPOLOGY getPrimitiveType() { return primitiveType; }

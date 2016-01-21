@@ -1,7 +1,8 @@
 #include "SharedDefines.h"
 
 CONSTANT_BUFFER_BEGIN(cbPerObject, b0)
-float4x4	gMVP;
+float4x4	gView;
+float4x4	gProj;
 float4x4	gWorld;
 #ifdef __cplusplus
 const static int REGISTER_SLOT = 0;

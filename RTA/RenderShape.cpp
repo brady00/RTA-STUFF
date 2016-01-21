@@ -7,14 +7,8 @@ void RenderShape::RenderFunction(RenderNode& node)
 	//RenderContext &context = *shape.GetRenderContext();
 
 	// Set matrices
-	DirectX::XMMATRIX world = XMLoadFloat4x4(shape.GetWorldMatrixPtr());
-	DirectX::XMMATRIX worldViewProj = world*XMLoadFloat4x4(&shape.GetViewProjMatrix());
-	DirectX::XMFLOAT4X4 tempMVP;
-	DirectX::XMFLOAT4X4 tempWorld;
-	DirectX::XMStoreFloat4x4(&tempMVP, worldViewProj);
-	DirectX::XMStoreFloat4x4(&tempWorld, world);
-	Renderer::SetPerObjectData(tempMVP, tempWorld);
+	Renderer::SetPerObjectData(shape.GetViewMatrix(), shape.GetProjMatrix(), *shape.GetWorldMatrixPtr());
 	Renderer::devicecontext->IASetPrimitiveTopology(shape.getPrimitiveType());
 
 	Renderer::devicecontext->Draw(shape.getNumPrimitives(), shape.startVertex);
-}
+} 

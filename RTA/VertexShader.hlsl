@@ -17,8 +17,10 @@ struct VertexOut
 VertexOut main( VertexIn input)
 {
 	VertexOut output;
-
-	output.position = mul(float4(input.position, 1.0), gMVP);
+	
+	output.position = mul(float4(input.position, 1.0), gWorld);
+	output.position = mul(output.position, gView);
+	output.position = mul(output.position, gProj);
 	output.UV = input.UV;
 	output.Normal = input.Normal;
 

@@ -13,7 +13,6 @@
 
 HINSTANCE application;
 RenderSet* renderset;
-Camera* camera;
 DirectX::XMFLOAT4X4 cameraMatrix;
 skybox SkyBox;
 
@@ -107,24 +106,20 @@ void Init(HINSTANCE hinst, WNDPROC proc)
 	RenderShape* renderShape = new RenderShape;
 	
 	DirectX::XMMATRIX matrix2 = DirectX::XMMatrixMultiply(DirectX::XMMatrixRotationY(3.14), DirectX::XMLoadFloat4x4(&DirectX::XMFLOAT4X4(1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 100, 200, 1)));
-	DirectX::XMFLOAT4X4 world;
-	DirectX::XMStoreFloat4x4(&world, matrix2);
-	renderShape->SetWorldMatrix(world);
+	DirectX::XMStoreFloat4x4(renderShape->GetWorldMatrixPtr(), matrix2);
+	renderShape->SetWorldMatrix(renderShape->GetWorldMatrixPtr());
 	renderShape->RenderFunc = renderShape->RenderFunction;
 	renderShape->setNumPrimitives(verticies.size());
 	renderShape->setPrimitiveType(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 	renderShape->setstartIndex(0);
 	renderShape->setStartVertex(0);
-	DirectX::XMFLOAT4X4 matrix;
-	camera->init();
-	DirectX::XMStoreFloat4x4(&matrix , XMMatrixMultiply(XMLoadFloat4x4(camera->viewMatrix), XMLoadFloat4x4(camera->projMatrix)));
-	renderShape->SetViewProjMatrix(matrix);
+	renderShape->SetViewMatrix(Renderer::camera->viewMatrix);
+	renderShape->SetProjMatrix(Renderer::camera->projMatrix);
 	//cameraMatrix = matrix;
 
 	renderMaterial->AddRenderShapes((RenderNode*)renderShape);
 	
 	renderset->AddRenderNode((RenderNode*)renderContext);
-
 	SkyBox.Create();
 }
 
@@ -132,8 +127,12 @@ bool Run()
 {
 	
 	SkyBox.Render();
+	Renderer::camera->CameraMovement();
+	//DirectX::XMFLOAT4X4 matrix;
+	//RenderSet* temp = &((RenderContext*)renderset->GetHead())->getRenderMaterials();
+	//((RenderShape*)temp->GetHead())->SetViewMatrix(Renderer::camera->viewMatrix);
+	//((RenderShape*)temp->GetHead())->SetProjMatrix(Renderer::camera->projMatrix);
 	Renderer::Render(renderset);
-	//camera->CameraMovement(cameraMatrix);
 	//RenderShape::GetViewProjMatrix
 
 	//float aspectRatio = 500.0f / 500.0f;
