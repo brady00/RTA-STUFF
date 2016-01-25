@@ -70,7 +70,7 @@ namespace FileInfo
 		bool FileInfo::ExporterHeader::FBXSave(char * fileName, std::vector<MyVertex>& pinVertexVector);
 		bool FileInfo::ExporterHeader::FBXRead(char * fileName, std::vector<MyVertex>& pinVertexVector);
 		void FileInfo::ExporterHeader::LoadMesh_Skeleton(FbxMesh *fbxMesh);
-
+		void FileInfo::ExporterHeader::LoadNodeKeyframeAnimation(FbxNode* fbxNode);
 		//Used for reading in the header
 		ExporterHeader() {}
 		//used for writing out the header
