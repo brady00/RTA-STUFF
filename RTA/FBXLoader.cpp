@@ -24,6 +24,7 @@ bool FileInfo::ExporterHeader::FBXLoad(char * fileName, std::vector<MyVertex>* p
 	FbxImporter* pImporter = FbxImporter::Create(g_pFbxSdkManager, fileName);
 	FbxScene* pFbxScene = FbxScene::Create(g_pFbxSdkManager, fileName);
 	FbxIOFileHeaderInfo* header = pImporter->GetFileHeaderInfo();
+
 	if (header->mFileVersion != version)
 	{
 		if (header->mCreationTimeStampPresent)
@@ -130,10 +131,42 @@ bool FileInfo::ExporterHeader::FBXLoad(char * fileName, std::vector<MyVertex>* p
 				}
 			}
 
+			LoadMesh_Skeleton(pMesh);
+
 		}
 
 	}
 	return true;
+}
+
+void FileInfo::ExporterHeader::LoadMesh_Skeleton(FbxMesh *fbxMesh)
+{
+	int numDeformers = fbxMesh->GetDeformerCount();
+	FbxSkin* skin = (FbxSkin*)fbxMesh->GetDeformer(0, FbxDeformer::eSkin);
+	if (skin != 0)
+	{
+		int boneCount = skin->GetClusterCount();
+		for (int boneIndex = 0; boneIndex < boneCount; boneIndex++)
+		{
+			FbxCluster* cluster = skin->GetCluster(boneIndex);
+			FbxNode* bone = cluster->GetLink(); // Get a reference to the bone's node
+
+			// Get the bind pose
+			FbxAMatrix bindPoseMatrix;
+			cluster->GetTransformLinkMatrix(bindPoseMatrix);
+
+			int *boneVertexIndices = cluster->GetControlPointIndices();
+			double *boneVertexWeights = cluster->GetControlPointWeights();
+
+			// Iterate through all the vertices, which are affected by the bone
+			int numBoneVertexIndices = cluster->GetControlPointIndicesCount();
+			for (int boneVertexIndex = 0; boneVertexIndex < numBoneVertexIndices; boneVertexIndex++)
+			{
+				boneVertexIndex = boneVertexIndices[boneVertexIndex];
+				float boneWeight = (float)boneVertexWeights[boneVertexIndex];
+			}
+		}
+	}
 }
 
 bool FileInfo::ExporterHeader::FBXSave(char * fileName, std::vector<MyVertex>& pinVertexVector)

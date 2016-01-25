@@ -46,6 +46,7 @@ void Init(HINSTANCE hinst, WNDPROC proc)
 	std::vector<MyVertex> verticies;
 	if(file.FBXLoad("Teddy_Idle.fbx", &verticies, "Teddy_Idle.bin"))
 		file.FBXSave("Teddy_Idle.bin", verticies);
+
 	file.FBXRead("Teddy_Idle.bin", verticies);
 	for (unsigned int i = 0; i < verticies.size(); i+=3)
 	{
