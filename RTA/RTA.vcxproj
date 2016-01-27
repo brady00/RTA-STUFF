@@ -100,6 +100,7 @@
     <ClInclude Include="ConstantBuffers.h" />
     <ClInclude Include="DDSTextureLoader.h" />
     <ClInclude Include="FBXLoader.h" />
+    <ClInclude Include="Header.h" />
     <ClInclude Include="Headers.h" />
     <ClInclude Include="pch.h" />
     <ClInclude Include="RenderContext.h" />

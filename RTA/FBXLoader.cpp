@@ -1,4 +1,5 @@
 #include "FBXLoader.h"
+#include "Header.h"
 #include <fstream>
 
 
@@ -89,7 +90,7 @@ bool FileInfo::ExporterHeader::FBXLoad(char * fileName, std::vector<MyVertex>* p
 					vertex.pos[2] = (float)pVertices[iControlPointIndex].mData[2];
 
 					int lPolyVertIndex = pMesh->GetPolygonVertex(j, k);
-					
+
 					int lUVIndex = lUseIndex ? lUVElement->GetIndexArray().GetAt(lPolyVertIndex) : lPolyVertIndex;
 					const int lIndexCount = (lUseIndex) ? lUVElement->GetIndexArray().GetCount() : 0;
 					FbxVector2 lUVValue;
@@ -99,7 +100,7 @@ bool FileInfo::ExporterHeader::FBXLoad(char * fileName, std::vector<MyVertex>* p
 						lUVValue = lUVElement->GetDirectArray().GetAt(lUVIndex);
 						lPolyIndexCounter++;
 					}
-					
+					pMesh->get
 
 					//int lNormalIndex = 0;
 					//reference mode is direct, the normal index is same as vertex index.
@@ -122,17 +123,18 @@ bool FileInfo::ExporterHeader::FBXLoad(char * fileName, std::vector<MyVertex>* p
 					vertex.uv[1] = 1 - vertex.uv[1];
 					//vertex.uv[0] = 1 - vertex.uv[0];
 
-					
+
 					vertex.normals[0] = lNormal.mData[0];
 					vertex.normals[1] = lNormal.mData[1];
 					vertex.normals[2] = lNormal.mData[2];
-				
+
 					pOutVertexVector->push_back(vertex);
 				}
 			}
 			//skeleton stufff
 			LoadMesh_Skeleton(pMesh);
 
+			DisplayAnimation(pMesh->GetScene());
 		}
 
 	}
@@ -169,54 +171,54 @@ void FileInfo::ExporterHeader::LoadMesh_Skeleton(FbxMesh *fbxMesh)
 	}
 }
 
-//void FileInfo::ExporterHeader::LoadNodeKeyframeAnimation(FbxNode* fbxNode)
-//{
-//	bool isAnimated = false;
-//
-//	// Iterate all animations (for example, walking, running, falling and etc.)
-//	//fbxNode->GetMesh()->GetScene();
-//		FbxAnimStack *animStack = (FbxAnimStack*)this->fbxScene->GetSrcObject(FbxAnimStack::ClassId, animationIndex);
-//		FbxAnimEvaluator *animEvaluator = this->fbxScene->GetAnimationEvaluator();
-//		animStack->GetName(); // Get the name of the animation if needed
-//
-//		// Iterate all the transformation layers of the animation. You can have several layers, for example one for translation, one for rotation, one for scaling and each can have keys at different frame numbers.
-//		int numLayers = animStack->GetMemberCount();
-//		for (int layerIndex = 0; layerIndex < numLayers; layerIndex++)
-//		{
-//			FbxAnimLayer *animLayer = (FbxAnimLayer*)animStack->GetMember(layerIndex);
-//			animLayer->GetName(); // Get the layer's name if needed
-//
-//			FbxAnimCurve *translationCurve = fbxNode->LclTranslation.GetCurve(animLayer);
-//			FbxAnimCurve *rotationCurve = fbxNode->LclRotation.GetCurve(animLayer);
-//			FbxAnimCurve *scalingCurve = fbxNode->LclScaling.GetCurve(animLayer);
-//
-//			if (scalingCurve != 0)
-//			{
-//				int numKeys = scalingCurve->KeyGetCount();
-//				for (int keyIndex = 0; keyIndex < numKeys; keyIndex++)
-//				{
-//					FbxTime frameTime = scalingCurve->KeyGetTime(keyIndex);
-//					FbxDouble3 scalingVector = fbxNode->EvaluateLocalScaling(frameTime);
-//					float x = (float)scalingVector[0];
-//					float y = (float)scalingVector[1];
-//					float z = (float)scalingVector[2];
-//
-//					float frameSeconds = (float)frameTime.GetSecondDouble(); // If needed, get the time of the scaling keyframe, in seconds
-//				}
-//			}
-//			else
-//			{
-//				// If this animation layer has no scaling curve, then use the default one, if needed
-//				FbxDouble3 scalingVector = fbxNode->LclScaling.Get();
-//				float x = (float)scalingVector[0];
-//				float y = (float)scalingVector[1];
-//				float z = (float)scalingVector[2];
-//			}
-//
-//			// Analogically, process rotationa and translation 
-//		}
-//	
-//}
+void FileInfo::ExporterHeader::LoadNodeKeyframeAnimation(FbxMesh* pMesh)
+{
+	bool isAnimated = false;
+
+	// Iterate all animations (for example, walking, running, falling and etc.)
+	FbxScene* fbxScene = pMesh->GetScene();
+	FbxAnimStack *animStack = (FbxAnimStack*)fbxScene->GetSrcObject();
+	FbxAnimEvaluator *animEvaluator = fbxScene->GetAnimationEvaluator();
+	animStack->GetName(); // Get the name of the animation if needed
+
+	// Iterate all the transformation layers of the animation. You can have several layers, for example one for translation, one for rotation, one for scaling and each can have keys at different frame numbers.
+	int numLayers = animStack->GetMemberCount();
+	for (int layerIndex = 0; layerIndex < numLayers; layerIndex++)
+	{
+		FbxAnimLayer *animLayer = (FbxAnimLayer*)animStack->GetMember(layerIndex);
+		animLayer->GetName(); // Get the layer's name if needed
+
+		FbxAnimCurve *translationCurve = pMesh->GetNode()->LclTranslation.GetCurve(animLayer);
+		FbxAnimCurve *rotationCurve = pMesh->GetNode()->LclRotation.GetCurve(animLayer);
+		FbxAnimCurve *scalingCurve = pMesh->GetNode()->LclScaling.GetCurve(animLayer);
+
+		if (scalingCurve != 0)
+		{
+			int numKeys = scalingCurve->KeyGetCount();
+			for (int keyIndex = 0; keyIndex < numKeys; keyIndex++)
+			{
+				FbxTime frameTime = scalingCurve->KeyGetTime(keyIndex);
+				FbxDouble3 scalingVector = pMesh->GetNode()->EvaluateLocalScaling(frameTime);
+				float x = (float)scalingVector[0];
+				float y = (float)scalingVector[1];
+				float z = (float)scalingVector[2];
+
+				float frameSeconds = (float)frameTime.GetSecondDouble(); // If needed, get the time of the scaling keyframe, in seconds
+			}
+		}
+		else
+		{
+			// If this animation layer has no scaling curve, then use the default one, if needed
+			FbxDouble3 scalingVector = pMesh->GetNode()->LclScaling.Get();
+			float x = (float)scalingVector[0];
+			float y = (float)scalingVector[1];
+			float z = (float)scalingVector[2];
+		}
+
+		// Analogically, process rotationa and translation 
+	}
+
+}
 
 bool FileInfo::ExporterHeader::FBXSave(char * fileName, std::vector<MyVertex>& pinVertexVector)
 {
